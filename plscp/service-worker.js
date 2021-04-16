@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/plscp/precache-manifest.3a8bd012f5fbd608698d03c0f27803c3.js"
+  "/toyweb/plscp/precache-manifest.39b4fec77375eb3792ff5d3415ff40dd.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "playlist_compare"});
