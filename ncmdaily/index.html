@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link
+            href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
+            rel="stylesheet"
+        />
+        <link
+            href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css"
+            rel="stylesheet"
+        />
+        <link
+            href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css"
+            rel="stylesheet"
+        />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
+        />
+    </head>
+
+    <body>
+        <div id="app">
+            <v-app class="" id="app">
+                <v-main>
+                    <v-card>
+                        <v-card-title>
+                            <v-menu :close-on-content-click="false">
+                                <template v-slot:activator="{ on, attrs }">
+                                    <v-btn
+                                        color="primary"
+                                        v-bind="attrs"
+                                        v-on="on"
+                                    >
+                                        选择日期
+                                    </v-btn>
+                                </template>
+                                <v-date-picker
+                                    v-model="currentDate"
+                                    :allowed-dates="allowedDates"
+                                ></v-date-picker>
+                                <!-- <v-list>
+                                    <v-list-item
+                                        v-for="(item, index) in dates"
+                                        :key="index"
+                                    >
+                                        <v-list-item-title
+                                            @click="currentDate=item"
+                                            >{{ item }}</v-list-item-title
+                                        >
+                                    </v-list-item>
+                                </v-list> -->
+                            </v-menu>
+                            <v-spacer></v-spacer>
+                            <v-text-field
+                                v-model="search"
+                                append-icon="mdi-magnify"
+                                label="Search"
+                                single-line
+                                hide-details
+                            ></v-text-field>
+                        </v-card-title>
+                        <v-data-table
+                            :headers="headers"
+                            :items="pls"
+                            :search="search"
+                            :disable-pagination="true"
+                            :hide-default-footer="true"
+                        ></v-data-table>
+                    </v-card>
+                </v-main>
+            </v-app>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/pako@2.0.3/dist/pako.min.js"></script>
+        <script>
+            new Vue({
+                el: "#app",
+                vuetify: new Vuetify(),
+                data: {
+                    search: "",
+                    headers: [
+                        { text: "歌曲标题", value: "name" },
+                        { text: "时长", value: "dt" },
+                        { text: "歌手", value: "ar" },
+                        { text: "专辑", value: "al" },
+                        { text: "reason", value: "reason" },
+                    ],
+                    dates: [],
+                    pls: [],
+                    files: {},
+                    currentDate: "",
+                },
+                watch: {
+                    currentDate(n, o) {
+                        this.getpls(this.files[n + ".json.gz"]);
+                    },
+                },
+                methods: {
+                    getFileList() {
+                        axios
+                            .get(
+                                "https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBaVB1bTlHbnF5a01sOHdMVXRXQTBGRXhhck1iQnc=/root?expand=children"
+                            )
+                            .then((r) => {
+                                r.data["children"].forEach((e) => {
+                                    this.files[e["name"]] =
+                                        e["@content.downloadUrl"];
+                                    this.dates.push(e["name"].split(".")[0]);
+                                });
+                            })
+                            .then(() => {
+                                this.currentDate = this.dates[
+                                    this.dates.length - 1
+                                ];
+                            });
+                    },
+                    getpls(url) {
+                        axios
+                            .get(url, {
+                                responseType: "arraybuffer",
+                            })
+                            .then((r) => {
+                                this.pls = JSON.parse(
+                                    pako.inflate(new Uint8Array(r.data), {
+                                        to: "string",
+                                    })
+                                )["data"]["dailySongs"];
+                            });
+                    },
+                    allowedDates(val) {
+                        return this.dates.includes(val);
+                    },
+                },
+                mounted() {
+                    this.getFileList();
+                    console.log("Dad");
+                },
+            });
+        </script>
+    </body>
+</html>
