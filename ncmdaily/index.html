@@ -62,7 +62,7 @@
                         </v-card-title>
                         <v-data-table
                             :headers="headers"
-                            :items="pls"
+                            :items="plsc"
                             :search="search"
                             :disable-pagination="true"
                             :hide-default-footer="true"
@@ -76,6 +76,7 @@
         <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/pako@2.0.3/dist/pako.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.4/dayjs.min.js"></script>
         <script>
             new Vue({
                 el: "#app",
@@ -94,10 +95,29 @@
                     files: {},
                     currentDate: "",
                 },
+                computed: {
+                    plsc() {
+                        let spls = [];
+                        this.pls.forEach((e) => {
+                            spls.push({
+                                //FIXME 时间超过60分钟的可能显示不对
+                                name: e["name"],
+                                dt: dayjs(e["dt"]).format("mm:ss"),
+                                ar: e["ar"].map((x) => x["name"]).join("/"),
+                                al: e["al"]["name"],
+                                reason: e["reason"],
+                            });
+                        });
+                        return spls;
+                    },
+                },
                 watch: {
                     currentDate(n, o) {
                         this.getpls(this.files[n + ".json.gz"]);
                     },
+                },
+                mounted() {
+                    this.getFileList();
                 },
                 methods: {
                     getFileList() {
@@ -134,10 +154,6 @@
                     allowedDates(val) {
                         return this.dates.includes(val);
                     },
-                },
-                mounted() {
-                    this.getFileList();
-                    console.log("Dad");
                 },
             });
         </script>
