@@ -97,7 +97,7 @@
             elementA.style.display = "none";
             let csvString = "songName,artist,album,date,loved\n";
             this.trackList.forEach((e) => {
-              csvString += `${e["name"]},${e["artist"]},${e["album"]},${e["date"]},${e["loved"]}\n`;
+              csvString += `${e["name"]},${e["artist"]},${e["album"]},${new Date(e["date"]).valueOf()},${e["loved"]}\n`;
             });
             let blob = new Blob([csvString], {
               type: "text/csv",
