@@ -155,7 +155,7 @@
             this.totalPages = Number(
               response["recenttracks"]["@attr"]["totalPages"]
             );
-            for (let index = 2; index < this.totalPages; index++) {
+            for (let index = 2; index <= this.totalPages; index++) {
               let response = await this.getRecentTracks(user, api_key, index);
               this.responsetify(response);
             }
