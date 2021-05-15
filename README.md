@@ -4,11 +4,11 @@ toy tool toylet ye
 
 ## LastFM Export
 
-exoprt your lastfm data
+export your lastfm data
 
 ## Playlist Compare
 
-playlist comapre for netease music and qqmusic
+playlist compare for netease music and qqmusic
 
 ## NCMDaily
 
