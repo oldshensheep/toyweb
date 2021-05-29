@@ -10,6 +10,7 @@ cp lastfm-export dist/ -r
 cp ncmdaily dist/ -r
 
 cd playlist-compare
+yarn install
 yarn run build
 mv dist plscp
 cp plscp ../dist -r
