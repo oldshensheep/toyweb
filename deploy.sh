@@ -21,14 +21,9 @@ cd ../dist
 # 部署到自定义域域名
 # echo 'www.example.com' > CNAME
 
+git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+git config --local user.name "github-actions[bot]"
+
 git init
 git add -A
 git commit -m 'deploy'
-
-# 部署到 https://<USERNAME>.github.io
-# git push -f git@github.com:<USERNAME>/<USERNAME>.github.io.git master
-
-# 部署到 https://<USERNAME>.github.io/<REPO>
-git push -f git@github.com:oldshensheep/toyweb.git master:gh-pages
-
-cd -
