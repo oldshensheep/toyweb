@@ -9,6 +9,7 @@ cp index.html dist/
 cp 404.html dist/
 cp lastfm-export dist/ -r
 cp ncmdaily dist/ -r
+cp dip dist/ -r
 
 cd playlist-compare
 yarn install
