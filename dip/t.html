@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css"
+      rel="stylesheet"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
+    />
+  </head>
+  <body>
+    <v-app id="app">
+      <v-main>
+        <v-subheader class="pl-0"> Show thumb when using slider </v-subheader>
+        <v-slider
+          @input="quantify_"
+          min="2"
+          max="128"
+          v-model="slider"
+          thumb-label
+        >
+          <template v-slot:append>
+            <v-text-field
+              v-model="slider"
+              class="mt-0 pt-0"
+              hide-details
+              single-line
+              type="number"
+              style="width: 60px"
+            ></v-text-field> </template
+        ></v-slider>
+        <img ref="srcImage" style="width: 200px" :src="imgsrc" />
+        <v-file-input
+          v-model="file"
+          show-size
+          style="width: 200px"
+          label="Select an image"
+          prepend-icon="mdi-camera"
+          accept="image/png, image/jpeg"
+          @change="imageChanged"
+        ></v-file-input>
+        <canvas
+          ref="originalCanvas"
+          :width="width"
+          :height="height"
+          style="display: none"
+        ></canvas>
+        <v-card
+          class="ma-2 pa-1 d-inline-block"
+          v-for="(m,s, index) in ms"
+          :key="index"
+        >
+          <v-card-title>{{s}}</v-card-title>
+          <canvas :id="s" :width="width" :height="height"></canvas>
+        </v-card>
+      </v-main>
+    </v-app>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script src="./t.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        vuetify: new Vuetify(),
+        data: {
+          ms: { grayscale: null, quantify: null, invert: null },
+          file: null,
+          imgsrc: "img.jpg",
+          width: "200",
+          height: "267",
+          slider: 64,
+          imageData: null,
+          ctx: null,
+        },
+        mounted() {
+          for (const iterator in this.ms) {
+            this.ms[iterator] = document
+              .getElementById(iterator)
+              .getContext("2d");
+          }
+          console.log(this.ms);
+          this.ctx = this.$refs.originalCanvas.getContext("2d");
+          this.$refs.srcImage.onload = () => {
+            this.width = this.$refs.srcImage.width;
+            this.height = this.$refs.srcImage.height;
+            /**
+             * 为什么 使用 nextTick？
+             * 参考文档 https://vuejs.org/v2/guide/reactivity.html#Async-Update-Queue
+             * 如果不使用 nextTick 会导致代码的执行结果和预想的不一样，更改data中的数据实际上并不会立即改变。
+             * 实际上是在更改完 canvas 之后才更新的。
+             * 而更改 canvas 的 width 或 height 会清空内容导致BUG。
+             */
+            this.$nextTick(() => {
+              console.log(this.width, this.height);
+              this.ctx.drawImage(
+                this.$refs.srcImage,
+                0,
+                0,
+                this.width,
+                this.height
+              );
+              this.imageData = this.ctx.getImageData(
+                0,
+                0,
+                this.width,
+                this.height
+              );
+              console.log(this.imageData);
+              this.grayscale_();
+              this.quantify_();
+              this.invert_();
+            });
+          };
+        },
+        methods: {
+          imageChanged() {
+            if (this.file === null) {
+              return;
+            }
+            console.log(this.file);
+            let reader = new FileReader();
+            reader.readAsDataURL(this.file);
+            reader.addEventListener(
+              "load",
+              () => {
+                this.imgsrc = reader.result;
+              },
+              false
+            );
+          },
+          quantify_() {
+            this.ms["quantify"].putImageData(
+              quantify(this.imageData, this.slider),
+              0,
+              0
+            );
+          },
+          grayscale_() {
+            this.ms["grayscale"].putImageData(grayscale(this.imageData), 0, 0);
+          },
+          invert_() {
+            this.ms["invert"].putImageData(invert(this.imageData), 0, 0);
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
