@@ -21,16 +21,18 @@
   <body>
     <v-app id="app">
       <v-main>
-        <img ref="srcImage" style="width: 200px" :src="imgsrc" />
-        <v-file-input
-          v-model="file"
-          show-size
-          style="width: 200px"
-          label="Select an image"
-          prepend-icon="mdi-camera"
-          accept="image/png, image/jpeg"
-          @change="imageChanged"
-        ></v-file-input>
+        <v-card class="ma-2 pa-1 d-inline-block">
+          <v-file-input
+            v-model="file"
+            show-size
+            style="width: 200px"
+            label="Select an image"
+            prepend-icon="mdi-camera"
+            accept="image/png, image/jpeg"
+            @change="imageChanged"
+          ></v-file-input>
+          <img ref="srcImage" style="width: 200px" :src="imgsrc" />
+        </v-card>
         <canvas
           ref="originalCanvas"
           :width="width"
@@ -42,11 +44,42 @@
           v-for="(m,s) in cards"
           :key="s"
         >
-          <v-card-title>{{s}}</v-card-title>
-          <v-slider min="2" max="128" v-model="m['sliderValue']" thumb-label>
+          <v-app-bar flat color="rgba(0, 0, 0, 0)">
+            <v-toolbar-title> {{s}} </v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-menu>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn v-bind="attrs" v-on="on" icon>
+                  <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item-group color="primary">
+                  <v-list-item
+                    v-for="(action, index) in actions"
+                    :key="index"
+                    @click="action.fun(s)"
+                  >
+                    <v-list-item-content>
+                      <v-list-item-title
+                        v-text="action.name"
+                      ></v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list-item-group>
+              </v-list>
+            </v-menu>
+          </v-app-bar>
+          <v-slider
+            v-if="m.withSliderBar"
+            min="2"
+            max="128"
+            v-model="m.sliderValue"
+            thumb-label
+          >
             <template v-slot:append>
               <v-text-field
-                v-model="m['sliderValue']"
+                v-model="m.sliderValue"
                 class="mt-0 pt-0"
                 hide-details
                 single-line
@@ -55,7 +88,7 @@
               ></v-text-field> </template
           ></v-slider>
           <canvas
-            :id="s"
+            :id="m.id"
             :width="width"
             :height="height"
             style="width: 200px"
@@ -63,7 +96,6 @@
         </v-card>
       </v-main>
     </v-app>
-
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
     <script src="./t.js"></script>
@@ -75,10 +107,10 @@
           return {
             cards: {
               quantify: {
-                name: "quantify",
+                id: "quantify",
                 ctx: null,
                 withSliderBar: true,
-                sliderValue: 32,
+                sliderValue: 64,
                 fun: () => {
                   this.cards["quantify"]["ctx"].putImageData(
                     quantify(
@@ -91,7 +123,7 @@
                 },
               },
               grayscale: {
-                name: "grayscale",
+                id: "grayscale",
                 ctx: null,
                 withSliderBar: false,
                 sliderValue: 32,
@@ -104,7 +136,7 @@
                 },
               },
               invert: {
-                name: "invert",
+                id: "invert",
                 ctx: null,
                 withSliderBar: false,
                 sliderValue: 32,
@@ -117,6 +149,25 @@
                 },
               },
             },
+            actions: {
+              save: {
+                name: "save",
+                fun: (card) => {
+                  document
+                    .getElementById(this.cards[card]["id"])
+                    .toBlob(function (blob) {
+                      var a = document.createElement("a");
+                      a.download = card;
+                      a.href = URL.createObjectURL(blob);
+                      a.dispatchEvent(new MouseEvent("click"));
+                    });
+                },
+              },
+              copy: {
+                name: "copy",
+                fun: () => {},
+              },
+            },
             file: null,
             imgsrc: "img.jpg",
             width: "200",
@@ -125,10 +176,11 @@
             ctx: null,
           };
         },
+        computed: {},
         mounted() {
           for (const card in this.cards) {
             this.cards[card]["ctx"] = document
-              .getElementById(this.cards[card]["name"])
+              .getElementById(this.cards[card]["id"])
               .getContext("2d");
           }
           this.ctx = this.$refs.originalCanvas.getContext("2d");
