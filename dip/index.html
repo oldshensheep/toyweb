@@ -21,24 +21,6 @@
   <body>
     <v-app id="app">
       <v-main>
-        <v-subheader class="pl-0"> Show thumb when using slider </v-subheader>
-        <v-slider
-          @input="quantify_"
-          min="2"
-          max="128"
-          v-model="slider"
-          thumb-label
-        >
-          <template v-slot:append>
-            <v-text-field
-              v-model="slider"
-              class="mt-0 pt-0"
-              hide-details
-              single-line
-              type="number"
-              style="width: 60px"
-            ></v-text-field> </template
-        ></v-slider>
         <img ref="srcImage" style="width: 200px" :src="imgsrc" />
         <v-file-input
           v-model="file"
@@ -57,11 +39,27 @@
         ></canvas>
         <v-card
           class="ma-2 pa-1 d-inline-block"
-          v-for="(m,s, index) in ms"
-          :key="index"
+          v-for="(m,s) in cards"
+          :key="s"
         >
           <v-card-title>{{s}}</v-card-title>
-          <canvas :id="s" :width="width" :height="height"></canvas>
+          <v-slider min="2" max="128" v-model="m['sliderValue']" thumb-label>
+            <template v-slot:append>
+              <v-text-field
+                v-model="m['sliderValue']"
+                class="mt-0 pt-0"
+                hide-details
+                single-line
+                type="number"
+                style="width: 60px"
+              ></v-text-field> </template
+          ></v-slider>
+          <canvas
+            :id="s"
+            :width="width"
+            :height="height"
+            style="width: 200px"
+          ></canvas>
         </v-card>
       </v-main>
     </v-app>
@@ -73,27 +71,70 @@
       new Vue({
         el: "#app",
         vuetify: new Vuetify(),
-        data: {
-          ms: { grayscale: null, quantify: null, invert: null },
-          file: null,
-          imgsrc: "img.jpg",
-          width: "200",
-          height: "267",
-          slider: 64,
-          imageData: null,
-          ctx: null,
+        data() {
+          return {
+            cards: {
+              quantify: {
+                name: "quantify",
+                ctx: null,
+                withSliderBar: true,
+                sliderValue: 32,
+                fun: () => {
+                  this.cards["quantify"]["ctx"].putImageData(
+                    quantify(
+                      this.imageData,
+                      this.cards["quantify"]["sliderValue"]
+                    ),
+                    0,
+                    0
+                  );
+                },
+              },
+              grayscale: {
+                name: "grayscale",
+                ctx: null,
+                withSliderBar: false,
+                sliderValue: 32,
+                fun: () => {
+                  this.cards["grayscale"]["ctx"].putImageData(
+                    grayscale(this.imageData),
+                    0,
+                    0
+                  );
+                },
+              },
+              invert: {
+                name: "invert",
+                ctx: null,
+                withSliderBar: false,
+                sliderValue: 32,
+                fun: () => {
+                  this.cards["invert"]["ctx"].putImageData(
+                    invert(this.imageData),
+                    0,
+                    0
+                  );
+                },
+              },
+            },
+            file: null,
+            imgsrc: "img.jpg",
+            width: "200",
+            height: "267",
+            imageData: null,
+            ctx: null,
+          };
         },
         mounted() {
-          for (const iterator in this.ms) {
-            this.ms[iterator] = document
-              .getElementById(iterator)
+          for (const card in this.cards) {
+            this.cards[card]["ctx"] = document
+              .getElementById(this.cards[card]["name"])
               .getContext("2d");
           }
-          console.log(this.ms);
           this.ctx = this.$refs.originalCanvas.getContext("2d");
           this.$refs.srcImage.onload = () => {
-            this.width = this.$refs.srcImage.width;
-            this.height = this.$refs.srcImage.height;
+            this.width = this.$refs.srcImage.naturalWidth;
+            this.height = this.$refs.srcImage.naturalHeight;
             /**
              * 为什么 使用 nextTick？
              * 参考文档 https://vuejs.org/v2/guide/reactivity.html#Async-Update-Queue
@@ -116,12 +157,18 @@
                 this.width,
                 this.height
               );
-              console.log(this.imageData);
-              this.grayscale_();
-              this.quantify_();
-              this.invert_();
             });
           };
+        },
+        watch: {
+          imageData() {
+            for (const card in this.cards) {
+              this.cards[card]["fun"]();
+            }
+          },
+          "cards.quantify.sliderValue"() {
+            this.cards["quantify"]["fun"]();
+          },
         },
         methods: {
           imageChanged() {
@@ -138,19 +185,6 @@
               },
               false
             );
-          },
-          quantify_() {
-            this.ms["quantify"].putImageData(
-              quantify(this.imageData, this.slider),
-              0,
-              0
-            );
-          },
-          grayscale_() {
-            this.ms["grayscale"].putImageData(grayscale(this.imageData), 0, 0);
-          },
-          invert_() {
-            this.ms["invert"].putImageData(invert(this.imageData), 0, 0);
           },
         },
       });
