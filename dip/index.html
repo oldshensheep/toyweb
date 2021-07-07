@@ -103,6 +103,7 @@
     <script>
       new Vue({
         //TODO 关闭canvas的抗锯齿功能
+        //TODO 给新添加的卡片设置输入
         el: "#app",
         vuetify: new Vuetify(),
         data() {
@@ -145,6 +146,97 @@
                 fun: () => {
                   this.cards["invert"]["ctx"].putImageData(
                     invert(this.imageData),
+                    0,
+                    0
+                  );
+                },
+              },
+              gaussian: {
+                id: "gaussian",
+                ctx: null,
+                withSliderBar: false,
+                sliderValue: 32,
+                fun: () => {
+                  this.cards["gaussian"]["ctx"].putImageData(
+                    gaussian_filter(this.imageData, 2),
+                    0,
+                    0
+                  );
+                },
+              },
+              uniform: {
+                id: "uniform",
+                ctx: null,
+                withSliderBar: false,
+                sliderValue: 32,
+                fun: () => {
+                  this.cards["uniform"]["ctx"].putImageData(
+                    uniform_filter(this.imageData),
+                    0,
+                    0
+                  );
+                },
+              },
+              laplace: {
+                id: "laplace",
+                ctx: null,
+                withSliderBar: false,
+                sliderValue: 32,
+                fun: () => {
+                  this.cards["laplace"]["ctx"].putImageData(
+                    laplace(this.imageData),
+                    0,
+                    0
+                  );
+                },
+              },
+              sobel: {
+                id: "sobel",
+                ctx: null,
+                withSliderBar: false,
+                sliderValue: 32,
+                fun: () => {
+                  this.cards["sobel"]["ctx"].putImageData(
+                    sobel(this.imageData),
+                    0,
+                    0
+                  );
+                },
+              },
+              minFilter: {
+                id: "minFilter",
+                ctx: null,
+                withSliderBar: false,
+                sliderValue: 32,
+                fun: () => {
+                  this.cards["minFilter"]["ctx"].putImageData(
+                    sortFilter(this.imageData, "min"),
+                    0,
+                    0
+                  );
+                },
+              },
+              mediumFilter: {
+                id: "mediumFilter",
+                ctx: null,
+                withSliderBar: false,
+                sliderValue: 32,
+                fun: () => {
+                  this.cards["mediumFilter"]["ctx"].putImageData(
+                    sortFilter(this.imageData, "med"),
+                    0,
+                    0
+                  );
+                },
+              },
+              maxFilter: {
+                id: "maxFilter",
+                ctx: null,
+                withSliderBar: false,
+                sliderValue: 32,
+                fun: () => {
+                  this.cards["maxFilter"]["ctx"].putImageData(
+                    sortFilter(this.imageData, "max"),
                     0,
                     0
                   );
