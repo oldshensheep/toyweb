@@ -17,6 +17,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
     />
+    <title>Digital image processing</title>
   </head>
   <body>
     <v-app id="app">
@@ -101,6 +102,7 @@
     <script src="./t.js"></script>
     <script>
       new Vue({
+        //TODO 关闭canvas的抗锯齿功能
         el: "#app",
         vuetify: new Vuetify(),
         data() {
@@ -168,6 +170,8 @@
                 fun: () => {},
               },
             },
+            imageSmoothingEnabled: true,
+            canvass: null,
             file: null,
             imgsrc: "img.jpg",
             width: "200",
@@ -178,6 +182,7 @@
         },
         computed: {},
         mounted() {
+          this.canvass = document.getElementsByTagName("canvas");
           for (const card in this.cards) {
             this.cards[card]["ctx"] = document
               .getElementById(this.cards[card]["id"])
@@ -221,6 +226,19 @@
           "cards.quantify.sliderValue"() {
             this.cards["quantify"]["fun"]();
           },
+          // imageSmoothingEnabled(n) {
+          //   console.log(this.canvass);
+          //   for (let i = 0; i < this.canvass.length; i++) {
+          //     let ctx = this.canvass.item(i).getContext("2d");
+          //     ctx.imageSmoothingEnabled = false;
+          //     ctx.mozImageSmoothingEnabled = false;
+          //     ctx.webkitImageSmoothingEnabled = false;
+          //     ctx.msImageSmoothingEnabled = false;
+          //   }
+          //   for (const card in this.cards) {
+          //     this.cards[card]["fun"]();
+          //   }
+          // },
         },
         methods: {
           imageChanged() {
