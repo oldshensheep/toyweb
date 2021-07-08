@@ -72,15 +72,17 @@
             </v-menu>
           </v-app-bar>
           <v-slider
-            v-if="m.withSliderBar"
-            min="2"
-            max="128"
-            v-model="m.sliderValue"
+            v-if="!!m.slider"
+            :min="m.slider.min"
+            :max="m.slider.max"
+            :disabled="m.slider.disabled"
+            v-model="m.slider.value"
+            @change="m.fun"
             thumb-label
           >
             <template v-slot:append>
               <v-text-field
-                v-model="m.sliderValue"
+                v-model="m.slider.value"
                 class="mt-0 pt-0"
                 hide-details
                 single-line
@@ -112,14 +114,17 @@
               quantify: {
                 id: "quantify",
                 ctx: null,
-                withSliderBar: true,
-                sliderValue: 64,
+                slider: {
+                  min: 2,
+                  max: 128,
+                  value: 64,
+                  disabled: false,
+                },
+                min: 2,
+                max: 128,
                 fun: () => {
-                  this.cards["quantify"]["ctx"].putImageData(
-                    quantify(
-                      this.imageData,
-                      this.cards["quantify"]["sliderValue"]
-                    ),
+                  this.cards.quantify.ctx.putImageData(
+                    quantify(this.imageData, this.cards.quantify.slider.value),
                     0,
                     0
                   );
@@ -128,10 +133,8 @@
               grayscale: {
                 id: "grayscale",
                 ctx: null,
-                withSliderBar: false,
-                sliderValue: 32,
                 fun: () => {
-                  this.cards["grayscale"]["ctx"].putImageData(
+                  this.cards.grayscale.ctx.putImageData(
                     grayscale(this.imageData),
                     0,
                     0
@@ -141,10 +144,8 @@
               invert: {
                 id: "invert",
                 ctx: null,
-                withSliderBar: false,
-                sliderValue: 32,
                 fun: () => {
-                  this.cards["invert"]["ctx"].putImageData(
+                  this.cards.invert.ctx.putImageData(
                     invert(this.imageData),
                     0,
                     0
@@ -154,92 +155,137 @@
               gaussian: {
                 id: "gaussian",
                 ctx: null,
-                withSliderBar: false,
-                sliderValue: 32,
+                slider: {
+                  min: 2,
+                  max: 16,
+                  value: 3,
+                  disabled: false,
+                },
                 fun: () => {
-                  this.cards["gaussian"]["ctx"].putImageData(
-                    gaussian_filter(this.imageData, 2),
+                  this.cards.gaussian.slider.disabled = true;
+                  this.cards.gaussian.ctx.putImageData(
+                    gaussian_filter(
+                      this.imageData,
+                      3,
+                      this.cards.gaussian.slider.value
+                    ),
                     0,
                     0
                   );
+                  this.cards.gaussian.slider.disabled = false;
                 },
               },
               uniform: {
                 id: "uniform",
                 ctx: null,
-                withSliderBar: false,
-                sliderValue: 32,
+                slider: {
+                  min: 2,
+                  max: 16,
+                  value: 3,
+                  disabled: false,
+                },
                 fun: () => {
-                  this.cards["uniform"]["ctx"].putImageData(
-                    uniform_filter(this.imageData),
+                  this.cards.uniform.slider.disabled = true;
+                  this.cards.uniform.ctx.putImageData(
+                    uniform_filter(
+                      this.imageData,
+                      this.cards.uniform.slider.value
+                    ),
                     0,
                     0
                   );
+                  this.cards.uniform.slider.disabled = false;
                 },
               },
               laplace: {
                 id: "laplace",
                 ctx: null,
-                withSliderBar: false,
-                sliderValue: 32,
                 fun: () => {
-                  this.cards["laplace"]["ctx"].putImageData(
-                    laplace(this.imageData),
-                    0,
-                    0
-                  );
+                  let worker = new Worker("t.js");
+                  worker.postMessage(["laplace", this.imageData]);
+                  worker.onmessage = (e) => {
+                    this.cards.laplace.ctx.putImageData(e.data, 0, 0);
+                  };
                 },
               },
               sobel: {
                 id: "sobel",
                 ctx: null,
-                withSliderBar: false,
-                sliderValue: 32,
                 fun: () => {
-                  this.cards["sobel"]["ctx"].putImageData(
-                    sobel(this.imageData),
-                    0,
-                    0
-                  );
+                  let worker = new Worker("t.js");
+                  worker.postMessage(["sobel", this.imageData]);
+                  worker.onmessage = (e) => {
+                    this.cards.sobel.ctx.putImageData(e.data, 0, 0);
+                  };
                 },
               },
               minFilter: {
                 id: "minFilter",
                 ctx: null,
-                withSliderBar: false,
-                sliderValue: 32,
+                slider: {
+                  min: 2,
+                  max: 16,
+                  value: 3,
+                  disabled: false,
+                },
                 fun: () => {
-                  this.cards["minFilter"]["ctx"].putImageData(
-                    sortFilter(this.imageData, "min"),
-                    0,
-                    0
-                  );
+                  this.cards.minFilter.slider.disabled = true;
+                  let worker = new Worker("t.js");
+                  worker.postMessage([
+                    "min",
+                    this.imageData,
+                    this.cards.minFilter.slider.value,
+                  ]);
+                  worker.onmessage = (e) => {
+                    this.cards.minFilter.ctx.putImageData(e.data, 0, 0);
+                    this.cards.minFilter.slider.disabled = false;
+                  };
                 },
               },
               mediumFilter: {
                 id: "mediumFilter",
                 ctx: null,
-                withSliderBar: false,
-                sliderValue: 32,
+                slider: {
+                  min: 2,
+                  max: 16,
+                  value: 3,
+                  disabled: false,
+                },
                 fun: () => {
-                  this.cards["mediumFilter"]["ctx"].putImageData(
-                    sortFilter(this.imageData, "med"),
-                    0,
-                    0
-                  );
+                  this.cards.mediumFilter.slider.disabled = true;
+                  let worker = new Worker("t.js");
+                  worker.postMessage([
+                    "med",
+                    this.imageData,
+                    this.cards.mediumFilter.slider.value,
+                  ]);
+                  worker.onmessage = (e) => {
+                    this.cards.mediumFilter.ctx.putImageData(e.data, 0, 0);
+                    this.cards.mediumFilter.slider.disabled = false;
+                  };
                 },
               },
               maxFilter: {
                 id: "maxFilter",
                 ctx: null,
-                withSliderBar: false,
-                sliderValue: 32,
+                slider: {
+                  min: 2,
+                  max: 16,
+                  value: 3,
+                  disabled: false,
+                },
                 fun: () => {
-                  this.cards["maxFilter"]["ctx"].putImageData(
-                    sortFilter(this.imageData, "max"),
-                    0,
-                    0
-                  );
+                  this.cards.maxFilter.slider.disabled = true;
+                  let worker = new Worker("t.js");
+                  worker.postMessage([
+                    "max",
+                    this.imageData,
+                    this.cards.maxFilter.slider.value,
+                  ]);
+                  worker.onmessage = (e) => {
+                    this.cards.maxFilter.ctx.putImageData(e.data, 0, 0);
+                    this.cards.maxFilter.slider.disabled = false;
+                  };
                 },
               },
             },
@@ -315,22 +361,6 @@
               this.cards[card]["fun"]();
             }
           },
-          "cards.quantify.sliderValue"() {
-            this.cards["quantify"]["fun"]();
-          },
-          // imageSmoothingEnabled(n) {
-          //   console.log(this.canvass);
-          //   for (let i = 0; i < this.canvass.length; i++) {
-          //     let ctx = this.canvass.item(i).getContext("2d");
-          //     ctx.imageSmoothingEnabled = false;
-          //     ctx.mozImageSmoothingEnabled = false;
-          //     ctx.webkitImageSmoothingEnabled = false;
-          //     ctx.msImageSmoothingEnabled = false;
-          //   }
-          //   for (const card in this.cards) {
-          //     this.cards[card]["fun"]();
-          //   }
-          // },
         },
         methods: {
           imageChanged() {

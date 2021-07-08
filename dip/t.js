@@ -1,3 +1,35 @@
+onmessage = function (msg) {
+  console.log("Worker: Message received from main script");
+  console.log(msg.data);
+  switch (msg.data[0]) {
+    case "gaussian":
+      postMessage(gaussian_filter(msg.data[1], msg.data[2], msg.data[3]));
+      break;
+    case "uniform":
+      postMessage(uniform_filter(msg.data[1], msg.data[2]));
+      break;
+    case "laplace":
+      postMessage(laplace(msg.data[1]));
+      break;
+    case "sobel":
+      postMessage(sobel(msg.data[1]));
+      break;
+    case "min":
+      postMessage(sortFilter(msg.data[1], "min", msg.data[2]));
+      break;
+    case "med":
+      postMessage(sortFilter(msg.data[1], "med", msg.data[2]));
+      break;
+    case "max":
+      postMessage(sortFilter(msg.data[1], "max", msg.data[2]));
+      break;
+    default:
+      break;
+  }
+  console.log("Worker: Posting message back to main script");
+  // postMessage(workerResult);
+};
+
 /**
  * Turn image to a grayscale image.
  * @param {ImageData} imageData
@@ -53,7 +85,7 @@ function quantify(imageData, q) {
  * @param {Number} size the size of the kernel(square).
  * @returns
  */
-function gaussian_filter(imageData, sigma, size = 3) {
+function gaussian_filter(imageData, sigma = 2, size = 3) {
   let kernel = [];
   let kSigma = Math.round(sigma / 2);
   for (let i = 0; i < size; i++) {
@@ -172,7 +204,7 @@ function conv_imageData(imageData, kernel) {
  * @param {Number} size the size of the kernel(square).
  * @returns
  */
-function sortFilter(imageData, p = "min", size = 5) {
+function sortFilter(imageData, p = "min", size = 3) {
   let newImageData = new ImageData(imageData.width, imageData.height);
   let iHeight = imageData.height;
   let iWidth = imageData.width;
