@@ -37,13 +37,15 @@ onmessage = function (msg) {
  */
 function grayscale(imageData) {
   let newImageData = new ImageData(imageData.width, imageData.height);
-  for (let i = 0; i < newImageData.data.length; i += 4) {
-    let avg =
-      (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
-    newImageData.data[i] = avg;
-    newImageData.data[i + 1] = avg;
-    newImageData.data[i + 2] = avg;
-    newImageData.data[i + 3] = imageData.data[i + 3];
+  let data = imageData.data;
+  let newData = newImageData.data;
+  let length = data.length;
+  for (let i = 0; i < length; i += 4) {
+    let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+    newData[i] = avg;
+    newData[i + 1] = avg;
+    newData[i + 2] = avg;
+    newData[i + 3] = data[i + 3];
   }
   return newImageData;
 }
@@ -54,11 +56,14 @@ function grayscale(imageData) {
  */
 function invert(imageData) {
   let newImageData = new ImageData(imageData.width, imageData.height);
-  for (let i = 0; i < newImageData.data.length; i += 4) {
-    newImageData.data[i] = 255 - imageData.data[i];
-    newImageData.data[i + 1] = 255 - imageData.data[i + 1];
-    newImageData.data[i + 2] = 255 - imageData.data[i + 2];
-    newImageData.data[i + 3] = imageData.data[i + 3];
+  let data = imageData.data;
+  let newData = newImageData.data;
+  let length = data.length;
+  for (let i = 0; i < length; i += 4) {
+    newData[i] = 255 - data[i];
+    newData[i + 1] = 255 - data[i + 1];
+    newData[i + 2] = 255 - data[i + 2];
+    newData[i + 3] = data[i + 3];
   }
   return newImageData;
 }
@@ -70,11 +75,14 @@ function invert(imageData) {
  */
 function quantify(imageData, q) {
   let newImageData = new ImageData(imageData.width, imageData.height);
-  for (let i = 0; i < newImageData.data.length; i += 4) {
-    newImageData.data[i] = Math.floor(imageData.data[i] / q) * q;
-    newImageData.data[i + 1] = Math.floor(imageData.data[i + 1] / q) * q;
-    newImageData.data[i + 2] = Math.floor(imageData.data[i + 2] / q) * q;
-    newImageData.data[i + 3] = imageData.data[i + 3];
+  let data = imageData.data;
+  let newData = newImageData.data;
+  let length = data.length;
+  for (let i = 0; i < length; i += 4) {
+    newData[i] = Math.floor(data[i] / q) * q;
+    newData[i + 1] = Math.floor(data[i + 1] / q) * q;
+    newData[i + 2] = Math.floor(data[i + 2] / q) * q;
+    newData[i + 3] = data[i + 3];
   }
   return newImageData;
 }
@@ -168,6 +176,8 @@ function sobel(imageData, axis = "x") {
  */
 function conv_imageData(imageData, kernel) {
   let newImageData = new ImageData(imageData.width, imageData.height);
+  let data = imageData.data;
+  let newData = newImageData.data;
   let iHeight = imageData.height;
   let iWidth = imageData.width;
   let kRows = kernel.length;
@@ -176,23 +186,22 @@ function conv_imageData(imageData, kernel) {
   let kCenterY = Math.floor(kRows / 2);
   for (let i = 0; i < iHeight; i++) {
     for (let j = 0; j < iWidth; j++) {
-      newImageData.data[(i * iWidth + j) * 4 + 3] =
-        imageData.data[(i * iWidth + j) * 4 + 3];
+      newData[(i * iWidth + j) * 4 + 3] = data[(i * iWidth + j) * 4 + 3];
       let a = [0, 0, 0]; // ImageData.data is Uint8ClampedArray
       for (let m = 0; m < kRows; m++) {
         for (let n = 0; n < kCols; n++) {
           let ii = i + (m - kCenterY);
           let jj = j + (n - kCenterX);
           if (ii >= 0 && ii < iHeight && jj >= 0 && jj < iWidth) {
-            a[0] += imageData.data[(ii * iWidth + jj) * 4 + 0] * kernel[m][n];
-            a[1] += imageData.data[(ii * iWidth + jj) * 4 + 1] * kernel[m][n];
-            a[2] += imageData.data[(ii * iWidth + jj) * 4 + 2] * kernel[m][n];
+            a[0] += data[(ii * iWidth + jj) * 4 + 0] * kernel[m][n];
+            a[1] += data[(ii * iWidth + jj) * 4 + 1] * kernel[m][n];
+            a[2] += data[(ii * iWidth + jj) * 4 + 2] * kernel[m][n];
           }
         }
       }
-      newImageData.data[(i * iWidth + j) * 4 + 0] = a[0];
-      newImageData.data[(i * iWidth + j) * 4 + 1] = a[1];
-      newImageData.data[(i * iWidth + j) * 4 + 2] = a[2];
+      newData[(i * iWidth + j) * 4 + 0] = a[0];
+      newData[(i * iWidth + j) * 4 + 1] = a[1];
+      newData[(i * iWidth + j) * 4 + 2] = a[2];
     }
   }
   return newImageData;
@@ -206,6 +215,8 @@ function conv_imageData(imageData, kernel) {
  */
 function sortFilter(imageData, p = "min", size = 3) {
   let newImageData = new ImageData(imageData.width, imageData.height);
+  let data = imageData.data;
+  let newData = newImageData.data;
   let iHeight = imageData.height;
   let iWidth = imageData.width;
   let kRows = size;
@@ -214,17 +225,16 @@ function sortFilter(imageData, p = "min", size = 3) {
   let kCenterY = Math.floor(size / 2);
   for (let i = 0; i < iHeight; i++) {
     for (let j = 0; j < iWidth; j++) {
-      newImageData.data[(i * iWidth + j) * 4 + 3] =
-        imageData.data[(i * iWidth + j) * 4 + 3];
+      newData[(i * iWidth + j) * 4 + 3] = data[(i * iWidth + j) * 4 + 3];
       let a = [[], [], []]; // ImageData.data is Uint8ClampedArray
       for (let m = 0; m < kRows; m++) {
         for (let n = 0; n < kCols; n++) {
           let ii = i + (m - kCenterY);
           let jj = j + (n - kCenterX);
           if (ii >= 0 && ii < iHeight && jj >= 0 && jj < iWidth) {
-            a[0].push(imageData.data[(ii * iWidth + jj) * 4 + 0]);
-            a[1].push(imageData.data[(ii * iWidth + jj) * 4 + 1]);
-            a[2].push(imageData.data[(ii * iWidth + jj) * 4 + 2]);
+            a[0].push(data[(ii * iWidth + jj) * 4 + 0]);
+            a[1].push(data[(ii * iWidth + jj) * 4 + 1]);
+            a[2].push(data[(ii * iWidth + jj) * 4 + 2]);
           }
         }
       }
@@ -237,9 +247,9 @@ function sortFilter(imageData, p = "min", size = 3) {
       } else if (p === "min") {
         pos = 0;
       }
-      newImageData.data[(i * iWidth + j) * 4 + 0] = a[0][pos];
-      newImageData.data[(i * iWidth + j) * 4 + 1] = a[1][pos];
-      newImageData.data[(i * iWidth + j) * 4 + 2] = a[2][pos];
+      newData[(i * iWidth + j) * 4 + 0] = a[0][pos];
+      newData[(i * iWidth + j) * 4 + 1] = a[1][pos];
+      newData[(i * iWidth + j) * 4 + 2] = a[2][pos];
     }
   }
   return newImageData;
@@ -257,10 +267,10 @@ function imageData2Array(imageData) {
     ia[i] = [];
     for (let j = 0; j < iHeight; j++) {
       ia[i][j] = [
-        imageData.data[(j * iWidth + i) * 4 + 0],
-        imageData.data[(j * iWidth + i) * 4 + 1],
-        imageData.data[(j * iWidth + i) * 4 + 2],
-        imageData.data[(j * iWidth + i) * 4 + 3],
+        data[(j * iWidth + i) * 4 + 0],
+        data[(j * iWidth + i) * 4 + 1],
+        data[(j * iWidth + i) * 4 + 2],
+        data[(j * iWidth + i) * 4 + 3],
       ];
     }
   }
