@@ -1,15 +1,31 @@
-# toyweb
 
-toy tool toylet ye
+English | [简体中文](./README.zh-CN.md)  
 
-## LastFM Export
+## toyweb
 
-export your lastfm data
+html js toys  
+<https://oldshensheep.github.io/toyweb>
 
-## Playlist Compare
+### LastFM Export
 
-playlist compare for netease music and qqmusic
+export your last.fm data to csv.
 
-## NCMDaily
+### Playlist Compare
 
-browse your netease daily recommendation
+playlist compare for netease music and qqmusic. (incomplete)
+
+### NCMDaily
+
+browse my netease daily recommendation.
+
+### dip
+
+digital image processing.
+
+- grayscale
+- invert
+- quantify
+- gaussian filter
+- laplace
+- max filter
+- ...
