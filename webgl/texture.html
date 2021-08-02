@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>webgl2 - triangle</title>
+</head>
+<body>
+<div>
+    <canvas id="canvas" style="border: 1px solid"></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/twgl.js@4.19.2/dist/4.x/twgl-full.min.js"></script>
+<script>
+    "use strict";
+
+    let vertexShaderSource = `#version 300 es
+    in vec2 a_position;
+
+    in vec2 a_texCoord;
+    out vec2 v_texCoord;
+    
+    void main() {
+      gl_Position = vec4(a_position.x,a_position.y,0,1);
+      v_texCoord = a_texCoord;
+    }
+`;
+
+    let fragmentShaderSource = `#version 300 es
+    precision highp float;
+    
+    uniform sampler2D u_image;
+    
+    in vec2 v_texCoord;
+    
+    out vec4 outColor;
+    
+    void main() {
+      outColor = texture(u_image, v_texCoord);
+    }
+`;
+
+    let image = new Image()
+    image.src = "../assets/img.jpg"
+    image.onload = function () {
+        render(image);
+    };
+
+    function render(image) {
+
+        let canvas = document.querySelector("#canvas")
+        let gl = canvas.getContext("webgl2");
+
+        let program = twgl.createProgram(gl, [
+            vertexShaderSource,
+            fragmentShaderSource,
+        ]);
+
+
+        let vao = gl.createVertexArray();
+        gl.bindVertexArray(vao);
+
+
+        let positionAttributeLocation = gl.getAttribLocation(
+            program,
+            "a_position"
+        );
+        let positionBuffer = gl.createBuffer();
+        gl.enableVertexAttribArray(positionAttributeLocation);
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.vertexAttribPointer(
+            positionAttributeLocation,
+            2,
+            gl.FLOAT,
+            false,
+            0,
+            0
+        );
+
+        let texCoordAttributeLocation = gl.getAttribLocation(
+            program,
+            "a_texCoord"
+        );
+        let texCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            new Float32Array([
+                0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
+            ]),
+            gl.STATIC_DRAW
+        );
+        gl.enableVertexAttribArray(texCoordAttributeLocation);
+
+        gl.vertexAttribPointer(
+            texCoordAttributeLocation,
+            2,
+            gl.FLOAT,
+            false,
+            0,
+            0
+        );
+
+        let imageLocation = gl.getUniformLocation(program, "u_image");
+        let texture = gl.createTexture();
+
+
+        gl.activeTexture(gl.TEXTURE0 + 0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        // Set the parameters so we don't need mips and so we're not filtering
+        // and we don't repeat at the edges
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            image
+        );
+
+        // twgl.resizeCanvasToDisplaySize(gl.canvas);
+
+        // Tell WebGL how to convert from clip space to pixels
+        // gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+        // Clear the canvas
+        // gl.clearColor(0, 0, 0, 0);
+        // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // Tell it to use our program (pair of shaders)
+        gl.useProgram(program);
+
+        // Tell the shader to get the texture from texture unit 0
+        gl.uniform1i(imageLocation, 0);
+
+        // Bind the position buffer so gl.bufferData that will be called
+        // in setRectangle puts data in the position buffer
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+        // Set a rectangle the same size as the image.
+        setRectangle(gl, 0, 0, image.width, image.height);
+
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    function setRectangle(gl, x, y, width, height) {
+        let x1 = x;
+        let x2 = x + width;
+        let y1 = y;
+        let y2 = y + height;
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]),
+            gl.STATIC_DRAW
+        );
+    }
+</script>
+</body>
+</html>
