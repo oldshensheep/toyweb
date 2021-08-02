@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>webgl2 - triangle</title>
+</head>
+<body>
+<div>
+    <canvas style="border: 1px solid"></canvas>
+</div>
+<script>
+    "use strict";
+
+    const canvas = document.querySelector("canvas");
+    const gl = canvas.getContext("webgl2");
+
+    const vs = `#version 300 es
+    in vec4 a_position;
+    in vec4 a_color;
+    uniform float time;
+
+    out vec4 v_color;
+
+    void main(){
+        gl_Position = vec4(a_position.x * cos(time),a_position.y* cos(time),a_position.z,a_position.w) ;
+        v_color = a_color* (cos(time) + 1.0);
+    }
+    `
+    const fs = `#version 300 es
+    precision highp float;
+
+
+    in vec4 v_color;
+    out vec4 outColor;
+
+    void main(){
+      outColor = v_color ;
+    }
+    `
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertexShader, vs)
+    gl.compileShader(vertexShader)
+
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
+    gl.shaderSource(fragmentShader, fs)
+    gl.compileShader(fragmentShader)
+
+    const glProgram = gl.createProgram();
+    gl.attachShader(glProgram, vertexShader)
+    gl.attachShader(glProgram, fragmentShader)
+    gl.linkProgram(glProgram)
+
+    const triangleVAO = gl.createVertexArray();
+    gl.bindVertexArray(triangleVAO);
+
+
+    // 设置a_position
+    const a_positionLoc = gl.getAttribLocation(glProgram, "a_position");
+    const vertexPosition = new Float32Array([
+        0, 0.7,
+        0.5, -0.7,
+        -0.5, -0.7,
+    ])
+    const a_positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, a_positionBuffer)
+    gl.bufferData(gl.ARRAY_BUFFER, vertexPosition, gl.STATIC_DRAW)
+    gl.enableVertexAttribArray(a_positionLoc)
+    gl.vertexAttribPointer(
+        a_positionLoc,
+        2,
+        gl.FLOAT,
+        false,
+        0,
+        0,
+    )
+
+    // 设置a_color
+    const a_colorLoc = gl.getAttribLocation(glProgram, "a_color");
+    const vertexColor = new Uint8Array([
+        255, 0, 0, 255,
+        0, 255, 0, 255,
+        0, 0, 255, 255,
+    ]);
+    const colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertexColor, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(a_colorLoc)
+    gl.vertexAttribPointer(
+        a_colorLoc,
+        4,
+        gl.UNSIGNED_BYTE,
+        true,
+        0,
+        0
+    )
+
+    const time = gl.getUniformLocation(glProgram, "time");
+    gl.useProgram(glProgram)
+
+    function render(t) {
+        gl.uniform1f(time, t * 0.0005)
+        gl.drawArrays(gl.TRIANGLES, 0, 3)
+        requestAnimationFrame(render)
+    }
+
+    requestAnimationFrame(render)
+
+</script>
+</body>
+</html>
