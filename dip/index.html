@@ -32,6 +32,28 @@
             accept="image/png, image/jpeg"
             @change="imageChanged"
           ></v-file-input>
+          <!-- <v-row>
+            <v-col>
+              <v-text-field
+                v-model="width"
+                class="mt-0 pt-0"
+                hide-details
+                single-line
+                type="number"
+                style="width: 100%"
+              ></v-text-field>
+            </v-col>
+            <v-col>
+              <v-text-field
+                v-model="height"
+                class="mt-0 pt-0"
+                hide-details
+                single-line
+                type="number"
+                style="width: 100%"
+              ></v-text-field>
+            </v-col>
+          </v-row> -->
           <img ref="srcImage" style="width: 200px" :src="imgsrc" />
         </v-card>
         <canvas
@@ -310,7 +332,7 @@
             imageSmoothingEnabled: true,
             canvass: null,
             file: null,
-            imgsrc: "img.jpg",
+            imgsrc: "../assets/img.jpg",
             width: "200",
             height: "267",
             imageData: null,
@@ -360,6 +382,22 @@
               this.cards[card]["fun"]();
             }
           },
+          // height() {
+          //   this.imageData = this.ctx.getImageData(
+          //     0,
+          //     0,
+          //     this.width,
+          //     this.height
+          //   );
+          // },
+          // width() {
+          //   this.imageData = this.ctx.getImageData(
+          //     0,
+          //     0,
+          //     this.width,
+          //     this.height
+          //   );
+          // },
         },
         methods: {
           imageChanged() {
