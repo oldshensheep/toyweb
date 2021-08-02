@@ -1,15 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8"/>
+    <link
+            href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
+            rel="stylesheet"
+    />
+    <link
+            href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css"
+            rel="stylesheet"
+    />
+    <link
+            href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css"
+            rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Sheep's Toy</title>
-  </head>
-  <body>
-    <a href="lastfm-export/">lastfm-export</a>
-    <a href="plscp/">playlist-compare</a>
-    <a href="ncmdaily/">ncmdaily</a>
-    <a href="dip/">Digital image processing</a>
-  </body>
+</head>
+<body>
+
+<v-app id="app">
+    <v-btn class="text-none" href="lastfm-export/">Last.FM Export</v-btn>
+    <v-btn class="text-none" inline-block href="plscp/">Playlist Compare</v-btn>
+    <v-btn class="text-none" href="ncmdaily/">Netease Cloud Music daily recommendation</v-btn>
+    <v-btn class="text-none" href="dip/">Digital image processing</v-btn>
+</v-app>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
+<script>
+    new Vue({
+        el: "#app",
+        vuetify: new Vuetify(),
+    })
+</script>
+</body>
 </html>
