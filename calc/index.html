@@ -56,17 +56,17 @@
             tip_a.textContent = "请输入数字a"
             return;
         }
-        if (b.value === "") {
-            tip_b.textContent = "请输入数字b"
-            return
-        }
-        clean_tips()
         let Number_a = Number(a.value);
-        let Number_b = Number(b.value);
         if (!Number.isFinite(Number_a)) {
             tip_a.textContent = "请正确输入数字a"
             return;
         }
+        clean_tips()
+        if (b.value === "") {
+            tip_b.textContent = "请输入数字b"
+            return
+        }
+        let Number_b = Number(b.value);
         if (!Number.isFinite(Number_b)) {
             tip_b.textContent = "请正确输入数字b"
             return
