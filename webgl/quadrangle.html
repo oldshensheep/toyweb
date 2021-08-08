@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>webgl2 - triangle</title>
+</head>
+<body>
+<div>
+  <canvas id="sheep" style="border: 1px solid" width="400px" height="400px" ></canvas>
+</div>
+<script src="./sgl.js"></script>
+<script>
+    "use strict";
+
+    const canvas = document.getElementById("sheep");
+    const gl = canvas.getContext("webgl2");
+
+    const vs = `#version 300 es
+    in vec4 a_position;
+    void main(){
+        gl_Position = a_position ;
+    }
+    `
+    const fs = `#version 300 es
+    precision highp float;
+
+    out vec4 outColor;
+
+    void main(){
+      outColor = vec4(0.5,0.5,0.5,0.9) ;
+
+    }
+    `
+    let glProgram = initShader(gl, vs, fs);
+    let dataBuffer = new Float32Array([
+        0, 0,
+        -0.5, 0.5,
+        0.5, 0,
+        0, 0.5,
+    ]);
+    // 一个平行四边形
+    // -----------
+    //  \         \
+    //   \         \
+    //    \         \
+    //     ----------
+    setVertexAttribArray(gl, glProgram, dataBuffer, "a_position", 2, false)
+    // 绘制逻辑 （一个数字代表点，和输入的顺序相关） 012 三个点围成一个三角形 然后是123 然后是234……
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+
+    setVertexAttribArray(gl, glProgram, new Float32Array([
+        0, 0,
+        -0.5, 0,
+        0, -0.5,
+        0.5, -0.5,
+    ]), "a_position", 2, false)
+    // 以0点为中心，以12，23，34为边连接中心。
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4)
+
+</script>
+</body>
+</html>
