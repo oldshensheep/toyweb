@@ -45,3 +45,19 @@ function setVertexAttribArray(gl, glProgram, bufferData, attributeName, size, no
     gl.enableVertexAttribArray(attribute)
     gl.vertexAttribPointer(attribute, size, gl.FLOAT, normalized, 0, 0)
 }
+
+/**
+ *
+ * @param gl {WebGL2RenderingContext}
+ * @param glProgram {WebGLProgram}
+ * @param image {Image}
+ * @param attributeName {string}
+ */
+function setSampler2D(gl, glProgram, image, attributeName) {
+    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture())
+    gl.activeTexture(gl.TEXTURE0);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
+    let u_image = gl.getUniformLocation(glProgram, attributeName);
+    gl.uniform1i(u_image, 0)
+}
