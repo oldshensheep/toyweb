@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+<div id="app">
+  {{canvas.width}}
+  {{canvas.height}}
+  <img ref="image" src="../assets/img/img.jpg" alt="original image for processing">
+  <canvas ref="invert" :width="canvas.width" :height="canvas.height" style="border: 1px solid"></canvas>
+  <canvas ref="average" :width="canvas.width" :height="canvas.height" style="border: 1px solid"></canvas>
+</div>
+
+<script src="../assets/lib/sgl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@3.2.2/dist/vue.global.js"></script>
+
+<script>
+    let vertexShaderSource = `#version 300 es
+    in vec2 a_position;
+    in vec2 a_texCoord;
+    out vec2 v_texCoord;
+
+    void main(){
+        gl_Position = vec4(a_position,0,1);
+        v_texCoord = a_texCoord;
+    }
+
+    `
+    function setFSSMain(main) {
+        return `#version 300 es
+    precision highp float;
+    in vec2 v_texCoord;
+    uniform sampler2D u_image;
+    out vec4 outColor;
+    void main(){
+      ${main}
+    }
+    `
+    }
+    let invert_fss = setFSSMain("outColor = vec4(vec3(1,1,1)-texture(u_image, v_texCoord).rgb,1);")
+    let average_fss = setFSSMain(`
+                    vec2 onePixel = vec2(1) / vec2(textureSize(u_image, 0));
+                    outColor = (
+                        texture(u_image, v_texCoord) +
+                        texture(u_image, v_texCoord + vec2( onePixel.x, 0.0)) +
+                        texture(u_image, v_texCoord + vec2(-onePixel.x, 0.0))) / 3.0;
+                    `)
+
+
+    Vue.createApp({
+        data() {
+            return {
+                canvas: {
+                    width: null,
+                    height: null,
+                },
+                cards: null,
+            }
+        },
+        mounted() {
+            this.$refs.image.onload = () => {
+                this.canvas.width = this.$refs.image.width
+                this.canvas.height = this.$refs.image.height
+            }
+        },
+        watch: {
+            canvas: {
+                async handler() {
+                    await Vue.nextTick()
+                    this.draw("invert", vertexShaderSource, invert_fss)
+                    this.draw("average", vertexShaderSource, average_fss)
+                },
+                deep: true,
+            }
+        },
+        methods: {
+            draw(ref, vertexShaderSource, fragmentShaderSource) {
+                let gl = this.$refs[ref].getContext("webgl2");
+                let glProgram = initShader(gl, vertexShaderSource, fragmentShaderSource);
+                setVertexAttribArray(gl, glProgram, new Float32Array([
+                    1, -1,
+                    -1, -1,
+                    1, 1,
+                    -1, 1
+                ]), "a_position", 2, false)
+                setVertexAttribArray(gl, glProgram, new Float32Array([
+                    1, 0,
+                    0, 0,
+                    1, 1,
+                    0, 1
+                ]), "a_texCoord", 2, false)
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+                setSampler2D(gl, glProgram, this.$refs.image, "u_image")
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+            }
+        }
+    }).mount('#app')
+
+</script>
+</body>
+</html>
