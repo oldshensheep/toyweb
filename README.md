@@ -1,26 +1,25 @@
-
-English | [简体中文](./README.zh-CN.md)  
+English | [简体中文](./README.zh-CN.md)
 
 ## toyweb
 
 html js toys  
 <https://oldshensheep.github.io/toyweb>
 
-### LastFM Export
+### [LastFM Export](./lastfm-export)
 
 export your last.fm data to csv.
 
-### Playlist Compare
+### [Playlist Compare](./playlist-compare)
 
-playlist compare for netease music and qqmusic. (incomplete)
+playlist compare for netease cloud music and qqmusic. (incomplete)
 
-### NCMDaily
+### [NCMDaily](./ncmdaily)
 
-browse my netease daily recommendation.
+browse my netease cloud music daily recommendation.
 
-### dip
+### [Digital Image Processing](./dip)
 
-digital image processing.
+digital image processing. pure javascript.
 
 - grayscale
 - invert
