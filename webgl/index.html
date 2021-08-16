@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <style>
-      canvas {
+      canvas, img {
           border: 1px solid;
           margin: 2px
       }
@@ -18,8 +18,13 @@
   {{canvas.height}}
   <img ref="image" crossorigin="anonymous" src="../assets/img/img.jpg" alt="original image for processing">
   <canvas ref="invert" :width="canvas.width" :height="canvas.height"></canvas>
-  <canvas ref="average" :width="canvas.width" :height="canvas.height"></canvas>
-  <canvas ref="kernel" :width="canvas.width" :height="canvas.height"></canvas>
+
+  <canvas v-for="(kernel,kernel_name) in kernels" :key="kernel_name" :ref="kernel_name" :width="canvas.width"
+          :height="canvas.height">
+    {{kernel}}
+    {{kernel_name}}
+  </canvas>
+
 </div>
 
 <script src="../assets/lib/sgl.js"></script>
@@ -88,25 +93,10 @@
     `
 
     let kernels = {
-        normal: [
-            0, 0, 0,
-            0, 1, 0,
-            0, 0, 0,
-        ],
         gaussianBlur: [
             0.045, 0.122, 0.045,
             0.122, 0.332, 0.122,
             0.045, 0.122, 0.045,
-        ],
-        gaussianBlur2: [
-            1, 2, 1,
-            2, 4, 2,
-            1, 2, 1,
-        ],
-        gaussianBlur3: [
-            0, 1, 0,
-            1, 1, 1,
-            0, 1, 0,
         ],
         unsharpen: [
             -1, -1, -1,
@@ -133,11 +123,6 @@
             -1, 8, -1,
             -1, -1, -1,
         ],
-        edgeDetect3: [
-            -5, 0, 0,
-            0, 0, 0,
-            0, 0, 5,
-        ],
         edgeDetect4: [
             -1, -1, -1,
             0, 0, 0,
@@ -163,25 +148,10 @@
             2, 0, -2,
             1, 0, -1,
         ],
-        previtHorizontal: [
-            1, 1, 1,
-            0, 0, 0,
-            -1, -1, -1,
-        ],
-        previtVertical: [
-            1, 0, -1,
-            1, 0, -1,
-            1, 0, -1,
-        ],
         boxBlur: [
             0.111, 0.111, 0.111,
             0.111, 0.111, 0.111,
             0.111, 0.111, 0.111,
-        ],
-        triangleBlur: [
-            0.0625, 0.125, 0.0625,
-            0.125, 0.25, 0.125,
-            0.0625, 0.125, 0.0625,
         ],
         emboss: [
             -2, -1, 0,
@@ -197,6 +167,7 @@
                     height: null,
                 },
                 cards: null,
+                kernels: kernels,
             }
         },
         mounted() {
@@ -210,23 +181,22 @@
                 async handler() {
                     await Vue.nextTick()
                     this.draw("invert", vertexShaderSource, invert_fss)
-                    this.draw("average", vertexShaderSource, average_fss)
-                    this.draw_kernel("kernel", [
-                        -1, -1, -1,
-                        -1, 8, -1,
-                        -1, -1, -1
-                    ])
+                    for (const kernel in kernels) {
+                        this.draw_kernel(kernel, kernels[kernel])
+                    }
                 },
                 deep: true,
             }
         },
         methods: {
             draw_kernel(ref, kernel) {
-                let {gl, glProgram} = this.initial(ref, vertexShaderSource, kernel_fss);
 
+                let {gl, glProgram} = this.initial(ref, vertexShaderSource, kernel_fss);
                 let u_kernel = gl.getUniformLocation(glProgram, "u_kernel");
+                let u_kernelWeight = gl.getUniformLocation(glProgram, "u_kernelWeight");
+
                 gl.uniform1fv(u_kernel, kernel)
-                gl.uniform1f(gl.getUniformLocation(glProgram, "u_kernelWeight"), computeKernelWeight(kernel))
+                gl.uniform1f(u_kernelWeight, computeKernelWeight(kernel))
 
                 function computeKernelWeight(kernel) {
                     let weight = kernel.reduce(function (prev, curr) {
@@ -235,28 +205,32 @@
                     return weight <= 0 ? 1 : weight;
                 }
 
-                function frame(t) {
-                    // let a = Math.abs(Math.sin(t * Math.sin(t * 0.001) * 0.001))
+                function randomKernel() {
                     let length = Object.keys(kernels).length
                     let index = Math.random() * length
                     let key = Object.keys(kernels)[Math.floor(index)]
-                    console.log(key)
-                    gl.uniform1fv(u_kernel, kernels[key])
-                    gl.uniform1f(gl.getUniformLocation(glProgram, "u_kernelWeight"), computeKernelWeight(kernels[key]))
+                    return kernels[key]
+                }
+
+                function frame(t) {
+                    // let a = Math.abs(Math.sin(t * Math.sin(t * 0.001) * 0.001))
+
+                    gl.uniform1fv(u_kernel, kernel)
+                    gl.uniform1f(u_kernelWeight, computeKernelWeight(kernel))
                     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
                 }
 
                 frame()
-                setInterval(() => {
-                    requestAnimationFrame(frame)
-
-                }, 300)
+                // setTimeout(()=>{
+                //     gl.getExtension('WEBGL_lose_context').loseContext();
+                //
+                // },2000)
             },
             draw(ref, vertexShaderSource, fragmentShaderSource) {
                 let {gl, glProgram} = this.initial(ref, vertexShaderSource, fragmentShaderSource);
 
                 function frame(t) {
-                    let a = Math.sin(t * 0.005)
+                    let a = 1
 
                     setVertexAttribArray(gl, glProgram, new Float32Array([
                         a, -1,
@@ -265,8 +239,7 @@
                         -1, a
                     ]), "a_position", 2, false)
                     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-                    requestAnimationFrame(frame)
-
+                    // requestAnimationFrame(frame)
                 }
 
                 frame()
@@ -290,7 +263,6 @@
                 setSampler2D(gl, glProgram, this.$refs.image, "u_image")
                 return {gl, glProgram}
             }
-
         }
     }).mount('#app')
 
