@@ -17,14 +17,14 @@
   {{canvas.width}}
   {{canvas.height}}
   <img ref="image" crossorigin="anonymous" src="../assets/img/img.jpg" alt="original image for processing">
-  <canvas ref="invert" :width="canvas.width" :height="canvas.height"></canvas>
+  <canvas id="invert" :width="canvas.width" :height="canvas.height"></canvas>
 
-  <canvas v-for="(kernel,kernel_name) in kernels" :key="kernel_name" :ref="kernel_name" :width="canvas.width"
+  <canvas v-for="(kernel,kernel_name) in kernels" :key="kernel_name" :id="kernel_name" :width="canvas.width"
           :height="canvas.height">
     {{kernel}}
     {{kernel_name}}
   </canvas>
-
+  <canvas ref="webglCanvas" style="display:none" :width="canvas.width" :height="canvas.height"></canvas>
 </div>
 
 <script src="../assets/lib/sgl.js"></script>
@@ -168,6 +168,7 @@
                 },
                 cards: null,
                 kernels: kernels,
+                gl: null
             }
         },
         mounted() {
@@ -180,6 +181,7 @@
             canvas: {
                 async handler() {
                     await Vue.nextTick()
+                    this.gl = this.$refs.webglCanvas.getContext("webgl2")
                     this.draw("invert", vertexShaderSource, invert_fss)
                     for (const kernel in kernels) {
                         this.draw_kernel(kernel, kernels[kernel])
@@ -221,6 +223,8 @@
                 }
 
                 frame()
+
+                this.render2canvas(ref)
                 // setTimeout(()=>{
                 //     gl.getExtension('WEBGL_lose_context').loseContext();
                 //
@@ -243,9 +247,10 @@
                 }
 
                 frame()
+                this.render2canvas(ref)
             },
             initial(ref, vertexShaderSource, fragmentShaderSource) {
-                let gl = this.$refs[ref].getContext("webgl2");
+                let gl = this.gl;
                 let glProgram = initShader(gl, vertexShaderSource, fragmentShaderSource);
                 setVertexAttribArray(gl, glProgram, new Float32Array([
                     1, -1,
@@ -262,6 +267,11 @@
                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
                 setSampler2D(gl, glProgram, this.$refs.image, "u_image")
                 return {gl, glProgram}
+            },
+            render2canvas(canvas_id) {
+                let ctx = document.getElementById(canvas_id).getContext("2d");
+                ctx.drawImage(this.gl.canvas, 0, 0)
+
             }
         }
     }).mount('#app')
