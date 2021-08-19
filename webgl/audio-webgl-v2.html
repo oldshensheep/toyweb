@@ -16,11 +16,29 @@
 <body>
 <canvas id="canvas"></canvas>
 <input type="file" id="file" accept="audio/*">
+<label for="input_width">线宽：</label><input type="number" id="input_width">
 <button onclick="play()">Play</button>
 <script src="../assets/lib/sgl.js"></script>
 <script>
     let file = document.getElementById("file");
     let canvas = document.getElementById("canvas")
+    let input_width = document.getElementById("input_width");
+    input_width.onchange = function () {
+        console.log(Number(input_width.value));
+        columnWidth = Number(input_width.value)
+        columnNum = binCount / columnWidth;
+        x = new Float32Array(columnNum * 2)
+        y = new Uint8Array(columnNum * 2);
+        xx = 1 / columnNum;
+        x[0] = -1
+        for (let i = 1; i < columnNum; i++) {
+            x[i * 2] = xx * 2 * i - 1
+            x[i * 2 - 1] = xx * 2 * i - 1
+        }
+        x[columnNum * 2 - 1] = 1
+        setVertexAttribArray(gl, glProgram, x, gl.FLOAT, "x", 1, false)
+
+    }
 
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
@@ -42,11 +60,20 @@
     console.log(audioCtx, analyser)
 
     let binCount = analyser.frequencyBinCount;
-    let x = new Float32Array(binCount)
-    let y = new Uint8Array(binCount);
-    for (let i = 0; i < 2 * binCount; i += 2) {
-        x[i / 2] = i / binCount - 1;
+    let columnWidth = 16;
+    input_width.value = columnWidth
+    let columnNum = binCount / columnWidth;
+    let x = new Float32Array(columnNum * 2)
+    let y = new Uint8Array(columnNum * 2);
+    let yy = new Uint8Array(binCount);
+
+    let xx = 1 / columnNum;
+    x[0] = -1
+    for (let i = 1; i < columnNum; i++) {
+        x[i * 2] = xx * 2 * i - 1
+        x[i * 2 - 1] = xx * 2 * i - 1
     }
+    x[columnNum * 2 - 1] = 1
 
     console.log(x)
     console.log(binCount)
@@ -112,11 +139,20 @@
 
 
     function render() {
-        analyser.getByteFrequencyData(y)
+        analyser.getByteFrequencyData(yy)
+        console.log(yy)
+        for (let i = 0; i < columnNum; i++) {
+            let sum = 0;
+            for (let j = 0; j < columnWidth; j++) {
+                sum += yy[i * columnWidth + j]
+            }
+            y[i * 2] = sum / columnWidth
+            y[i * 2 + 1] = sum / columnWidth
+        }
         console.log(y)
 
         setVertexAttribArray(gl, glProgram, y, gl.UNSIGNED_BYTE, "y", 1, true, gl.DYNAMIC_DRAW)
-        gl.drawArrays(gl.LINE_STRIP, 0, binCount)
+        gl.drawArrays(gl.LINE_STRIP, 0, columnNum * 2)
         requestAnimationFrame(render)
     }
 
