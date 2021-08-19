@@ -31,20 +31,23 @@ function initShader(gl, vertexShaderSource, fragmentShaderSource) {
  *
  * @param gl {WebGL2RenderingContext}
  * @param glProgram {WebGLProgram}
- * @param bufferData {Float32Array}
+ * @param bufferData {TypedArray}
+ * @param type {GLenum}
  * @param attributeName {string}
  * @param size {number}
  * @param normalized {boolean}
+ * @param drawType {GLenum}
  */
-function setVertexAttribArray(gl, glProgram, bufferData, attributeName, size, normalized) {
+function setVertexAttribArray(gl, glProgram, bufferData, type, attributeName, size, normalized, drawType = gl.STATIC_DRAW) {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
-    gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW)
+    gl.bufferData(gl.ARRAY_BUFFER, bufferData, drawType)
 
     let attribute = gl.getAttribLocation(glProgram, attributeName);
     gl.enableVertexAttribArray(attribute)
-    gl.vertexAttribPointer(attribute, size, gl.FLOAT, normalized, 0, 0)
+    gl.vertexAttribPointer(attribute, size, type, normalized, 0, 0)
 }
+
 
 /**
  *

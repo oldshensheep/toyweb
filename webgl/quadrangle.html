@@ -46,7 +46,7 @@
     //   \         \
     //    \         \
     //     ----------
-    setVertexAttribArray(gl, glProgram, dataBuffer, "a_position", 2, false)
+    setVertexAttribArray(gl, glProgram, dataBuffer, gl.FLOAT, "a_position", 2, false)
     // 绘制逻辑 （一个数字代表点，和输入的顺序相关） 012 三个点围成一个三角形 然后是123 然后是234……
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
@@ -55,7 +55,7 @@
         -0.5, 0,
         0, -0.5,
         0.5, -0.5,
-    ]), "a_position", 2, false)
+    ]), gl.FLOAT, "a_position", 2, false)
     // 以0点为中心，以12，23，34为边连接中心。
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4)
 
