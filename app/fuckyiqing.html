@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css"
+      rel="stylesheet"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <v-app>
+        <v-main>
+          <v-container>
+            <v-snackbar v-model="snackbar" timeout="2000" top>
+              {{ msg }}
+              <template v-slot:action="{ attrs }">
+                <v-btn
+                  color="pink"
+                  text
+                  v-bind="attrs"
+                  @click="snackbar = false"
+                >
+                  Close
+                </v-btn>
+              </template>
+            </v-snackbar>
+            <v-text-field
+              v-model="username"
+              outlined
+              placeholder="Username"
+            ></v-text-field>
+            <v-text-field
+              v-model="password"
+              outlined
+              placeholder="Password"
+            ></v-text-field>
+
+            <v-btn class="my-2" @click="Fuck()" block>提交</v-btn>
+            <v-btn class="my-2" @click="isInside()" block
+              >我在数据库里面吗？</v-btn
+            >
+            <v-text-field
+              v-model="api_host"
+              outlined
+              placeholder="API地址"
+            ></v-text-field>
+          </v-container>
+        </v-main>
+      </v-app>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        vuetify: new Vuetify(),
+        data() {
+          return {
+            username: null,
+            password: null,
+            snackbar: false,
+            msg: "",
+            api_host: "http://localhost:5000",
+          };
+        },
+        created() {
+          this.username = localStorage.getItem("username");
+          this.password = localStorage.getItem("password");
+        },
+        watch: {
+          username() {
+            localStorage.setItem("username", this.username);
+          },
+          password() {
+            localStorage.setItem("password", this.password);
+          },
+        },
+        methods: {
+          Fuck() {
+            let form_data = new FormData();
+            form_data.append("username", this.username);
+            form_data.append("password", this.password);
+            fetch(`${this.api_host}/user/insert`, {
+              method: "POST",
+              body: form_data,
+            }).then((response) => {
+              if (response.status === 200) {
+                this.msg = "录入成功";
+              } else {
+                this.msg = "录入失败，可能是密码错误导致的。";
+              }
+              this.snackbar = true;
+            });
+          },
+          isInside() {
+            let form_data = new FormData();
+            form_data.append("username", this.username);
+            form_data.append("password", this.password);
+            fetch(`${this.api_host}/is_in_db`, {
+              method: "POST",
+              body: form_data,
+            }).then((response) => {
+              if (response.status === 200) {
+                this.msg = "在";
+              } else {
+                this.msg = "不在";
+              }
+              this.snackbar = true;
+            });
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
