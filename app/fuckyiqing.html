@@ -69,12 +69,18 @@
             password: null,
             snackbar: false,
             msg: "",
-            api_host: "http://localhost:5000",
+            api_host:
+              "https://http-proxy.oldshensheep.workers.dev/http://dsadsadsa.pmiku.com",
           };
         },
         created() {
           this.username = localStorage.getItem("username");
           this.password = localStorage.getItem("password");
+          if (localStorage.getItem("api_host")) {
+            this.api_host = localStorage.getItem("api_host");
+          } else {
+            localStorage.setItem("api_host", this.api_host);
+          }
         },
         watch: {
           username() {
@@ -82,6 +88,9 @@
           },
           password() {
             localStorage.setItem("password", this.password);
+          },
+          api_host() {
+            localStorage.setItem("api_host", this.api_host);
           },
         },
         methods: {
@@ -94,7 +103,7 @@
               body: form_data,
             }).then((response) => {
               if (response.status === 200) {
-                this.msg = "录入成功";
+                this.msg = response.json()["msg"];
               } else {
                 this.msg = "录入失败，可能是密码错误导致的。";
               }
