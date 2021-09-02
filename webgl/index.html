@@ -1,281 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <style>
-      canvas, img {
-          border: 1px solid;
-          margin: 2px
-      }
-  </style>
-</head>
-<body>
-<div id="app">
-  {{canvas.width}}
-  {{canvas.height}}
-  <img ref="image" crossorigin="anonymous" src="../assets/img/img.jpg" alt="original image for processing">
-  <canvas id="invert" :width="canvas.width" :height="canvas.height"></canvas>
-
-  <canvas v-for="(kernel,kernel_name) in kernels" :key="kernel_name" :id="kernel_name" :width="canvas.width"
-          :height="canvas.height">
-    {{kernel}}
-    {{kernel_name}}
-  </canvas>
-  <canvas ref="webglCanvas" style="display:none" :width="canvas.width" :height="canvas.height"></canvas>
-</div>
-
-<script src="../assets/lib/sgl.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue@3.2.2/dist/vue.global.js"></script>
-
-<script>
-    let vertexShaderSource = `#version 300 es
-    in vec2 a_position;
-    in vec2 a_texCoord;
-    out vec2 v_texCoord;
-
-    void main(){
-        gl_Position = vec4(a_position,0,1);
-        v_texCoord = a_texCoord;
-    }
-
-    `
-
-    function setFSSMain(main) {
-        return `#version 300 es
-    precision highp float;
-    in vec2 v_texCoord;
-    uniform sampler2D u_image;
-    out vec4 outColor;
-    void main(){
-      ${main}
-    }
-    `
-    }
-
-    let invert_fss = setFSSMain("outColor = vec4(vec3(1,1,1)-texture(u_image, v_texCoord).rgb,1);")
-    let average_fss = setFSSMain(`
-                    vec2 onePixel = vec2(1) / vec2(textureSize(u_image, 0));
-                    outColor = (
-                        texture(u_image, v_texCoord) +
-                        texture(u_image, v_texCoord + vec2( onePixel.x, 0.0)) +
-                        texture(u_image, v_texCoord + vec2(-onePixel.x, 0.0))) / 3.0;
-                    `)
-    let kernel_fss = `#version 300 es
-
-    precision highp float;
-
-    uniform sampler2D u_image;
-
-    uniform float u_kernel[9];
-    uniform float u_kernelWeight;
-
-    in vec2 v_texCoord;
-    out vec4 outColor;
-
-    void main() {
-      vec2 onePixel = vec2(1) / vec2(textureSize(u_image, 0));
-
-      vec4 colorSum =
-          texture(u_image, v_texCoord + onePixel * vec2(-1, -1)) * u_kernel[0] +
-          texture(u_image, v_texCoord + onePixel * vec2( 0, -1)) * u_kernel[1] +
-          texture(u_image, v_texCoord + onePixel * vec2( 1, -1)) * u_kernel[2] +
-          texture(u_image, v_texCoord + onePixel * vec2(-1,  0)) * u_kernel[3] +
-          texture(u_image, v_texCoord + onePixel * vec2( 0,  0)) * u_kernel[4] +
-          texture(u_image, v_texCoord + onePixel * vec2( 1,  0)) * u_kernel[5] +
-          texture(u_image, v_texCoord + onePixel * vec2(-1,  1)) * u_kernel[6] +
-          texture(u_image, v_texCoord + onePixel * vec2( 0,  1)) * u_kernel[7] +
-          texture(u_image, v_texCoord + onePixel * vec2( 1,  1)) * u_kernel[8] ;
-      outColor = vec4((colorSum / u_kernelWeight).rgb, 1);
-    }
-    `
-
-    let kernels = {
-        gaussianBlur: [
-            0.045, 0.122, 0.045,
-            0.122, 0.332, 0.122,
-            0.045, 0.122, 0.045,
-        ],
-        unsharpen: [
-            -1, -1, -1,
-            -1, 9, -1,
-            -1, -1, -1,
-        ],
-        sharpness: [
-            0, -1, 0,
-            -1, 5, -1,
-            0, -1, 0,
-        ],
-        sharpen: [
-            -1, -1, -1,
-            -1, 16, -1,
-            -1, -1, -1,
-        ],
-        edgeDetect: [
-            -0.125, -0.125, -0.125,
-            -0.125, 1, -0.125,
-            -0.125, -0.125, -0.125,
-        ],
-        edgeDetect2: [
-            -1, -1, -1,
-            -1, 8, -1,
-            -1, -1, -1,
-        ],
-        edgeDetect4: [
-            -1, -1, -1,
-            0, 0, 0,
-            1, 1, 1,
-        ],
-        edgeDetect5: [
-            -1, -1, -1,
-            2, 2, 2,
-            -1, -1, -1,
-        ],
-        edgeDetect6: [
-            -5, -5, -5,
-            -5, 39, -5,
-            -5, -5, -5,
-        ],
-        sobelHorizontal: [
-            1, 2, 1,
-            0, 0, 0,
-            -1, -2, -1,
-        ],
-        sobelVertical: [
-            1, 0, -1,
-            2, 0, -2,
-            1, 0, -1,
-        ],
-        boxBlur: [
-            0.111, 0.111, 0.111,
-            0.111, 0.111, 0.111,
-            0.111, 0.111, 0.111,
-        ],
-        emboss: [
-            -2, -1, 0,
-            -1, 1, 1,
-            0, 1, 2,
-        ],
-    };
-    Vue.createApp({
-        data() {
-            return {
-                canvas: {
-                    width: null,
-                    height: null,
-                },
-                cards: null,
-                kernels: kernels,
-                gl: null
-            }
-        },
-        mounted() {
-            this.$refs.image.onload = () => {
-                this.canvas.width = this.$refs.image.width
-                this.canvas.height = this.$refs.image.height
-            }
-        },
-        watch: {
-            canvas: {
-                async handler() {
-                    await Vue.nextTick()
-                    this.gl = this.$refs.webglCanvas.getContext("webgl2")
-                    this.draw("invert", vertexShaderSource, invert_fss)
-                    for (const kernel in kernels) {
-                        this.draw_kernel(kernel, kernels[kernel])
-                    }
-                },
-                deep: true,
-            }
-        },
-        methods: {
-            draw_kernel(ref, kernel) {
-
-                let {gl, glProgram} = this.initial(ref, vertexShaderSource, kernel_fss);
-                let u_kernel = gl.getUniformLocation(glProgram, "u_kernel");
-                let u_kernelWeight = gl.getUniformLocation(glProgram, "u_kernelWeight");
-
-                gl.uniform1fv(u_kernel, kernel)
-                gl.uniform1f(u_kernelWeight, computeKernelWeight(kernel))
-
-                function computeKernelWeight(kernel) {
-                    let weight = kernel.reduce(function (prev, curr) {
-                        return prev + curr;
-                    });
-                    return weight <= 0 ? 1 : weight;
-                }
-
-                function randomKernel() {
-                    let length = Object.keys(kernels).length
-                    let index = Math.random() * length
-                    let key = Object.keys(kernels)[Math.floor(index)]
-                    return kernels[key]
-                }
-
-                function frame(t) {
-                    // let a = Math.abs(Math.sin(t * Math.sin(t * 0.001) * 0.001))
-
-                    gl.uniform1fv(u_kernel, kernel)
-                    gl.uniform1f(u_kernelWeight, computeKernelWeight(kernel))
-                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-                }
-
-                frame()
-
-                this.render2canvas(ref)
-                // setTimeout(()=>{
-                //     gl.getExtension('WEBGL_lose_context').loseContext();
-                //
-                // },2000)
-            },
-            draw(ref, vertexShaderSource, fragmentShaderSource) {
-                let {gl, glProgram} = this.initial(ref, vertexShaderSource, fragmentShaderSource);
-
-                function frame(t) {
-                    let a = 1
-
-                    setVertexAttribArray(gl, glProgram, new Float32Array([
-                        a, -1,
-                        -1, -1,
-                        a, a,
-                        -1, a
-                    ]), gl.FLOAT, "a_position", 2, false)
-                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-                    // requestAnimationFrame(frame)
-                }
-
-                frame()
-                this.render2canvas(ref)
-            },
-            initial(ref, vertexShaderSource, fragmentShaderSource) {
-                let gl = this.gl;
-                let glProgram = initShader(gl, vertexShaderSource, fragmentShaderSource);
-                setVertexAttribArray(gl, glProgram, new Float32Array([
-                    1, -1,
-                    -1, -1,
-                    1, 1,
-                    -1, 1
-                ]), gl.FLOAT, "a_position", 2, false)
-                setVertexAttribArray(gl, glProgram, new Float32Array([
-                    1, 0,
-                    0, 0,
-                    1, 1,
-                    0, 1
-                ]), gl.FLOAT, "a_texCoord", 2, false)
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
-                setSampler2D(gl, glProgram, this.$refs.image, "u_image")
-                return {gl, glProgram}
-            },
-            render2canvas(canvas_id) {
-                let ctx = document.getElementById(canvas_id).getContext("2d");
-                ctx.drawImage(this.gl.canvas, 0, 0)
-
-            }
-        }
-    }).mount('#app')
-
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebGL</title>
+  </head>
+  <body>
+    <v-app id="app">
+      <v-btn class="text-none" inline-block href="./audio-webgl.html"
+        >audio-webgl</v-btn
+      >
+      <v-btn class="text-none" inline-block href="./audio-webgl-v2.html"
+        >audio-webgl-v2</v-btn
+      >
+      <v-btn class="text-none" inline-block href="./audio-webgl-v3.html"
+        >audio-webgl-v3</v-btn
+      >
+      <v-btn class="text-none" href="./dip-webgl.html"
+        >Digital image processing(WebGL)</v-btn
+      >
+      <v-btn class="text-none" href="./transform.html">transform</v-btn>
+      <v-btn class="text-none" href="./triangle.html">triangle</v-btn>
+    </v-app>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        vuetify: new Vuetify(),
+      });
+    </script>
+  </body>
 </html>
