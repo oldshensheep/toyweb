@@ -35,13 +35,6 @@
                   v-model="currentDate"
                   :allowed-dates="allowedDates"
                 ></v-date-picker>
-                <!-- <v-list>
-                  <v-list-item v-for="(item, index) in dates" :key="index">
-                    <v-list-item-title @click="currentDate=item"
-                      >{{ item }}</v-list-item-title
-                    >
-                  </v-list-item>
-                </v-list> -->
               </v-menu>
               <div class="mx-4">{{currentDate}}</div>
               <v-spacer></v-spacer>
@@ -78,9 +71,13 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pako@2.0.3/dist/pako.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.4/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fflate/umd/index.js"></script>
     <script>
+      function sec2text00_00(currentTime) {
+        let m = Math.floor(currentTime / 60);
+        let s = Math.round(currentTime % 60);
+        return `${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
+      }
       new Vue({
         el: "#app",
         vuetify: new Vuetify(),
@@ -104,9 +101,8 @@
             let spls = [];
             this.pls.forEach((e) => {
               spls.push({
-                //FIXME 时间超过60分钟的可能显示不对
                 name: e["name"],
-                dt: dayjs(e["dt"]).format("mm:ss"),
+                dt: sec2text00_00(e["dt"] / 1000),
                 ar: e["ar"].map((x) => x["name"]).join("/"),
                 al: e["al"]["name"],
                 reason: e["reason"],
@@ -150,9 +146,9 @@
               })
               .then((r) => {
                 this.pls = JSON.parse(
-                  pako.inflate(new Uint8Array(r.data), {
-                    to: "string",
-                  })
+                  fflate.strFromU8(
+                    fflate.decompressSync(new Uint8Array(r.data))
+                  )
                 )["data"]["dailySongs"];
               });
           },
