@@ -78,6 +78,7 @@
         let s = Math.round(currentTime % 60);
         return `${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
       }
+      SHARE_URL = "https://cd.oldshensheep.com/s/BTHF3RCqoncSQAN";
       new Vue({
         el: "#app",
         vuetify: new Vuetify(),
@@ -93,7 +94,6 @@
           ],
           dates: [],
           pls: [],
-          files: {},
           currentDate: "",
         },
         computed: {
@@ -114,7 +114,13 @@
         },
         watch: {
           currentDate(n, o) {
-            this.getpls(this.files[n + ".json.gz"]);
+            console.log(n, o);
+            date = n.split("-");
+            year = date[0];
+            month = date[1];
+            this.getpls(
+              `${SHARE_URL}/download?path=/${year}/${month}&files=${n}.json.gz`
+            );
           },
         },
         mounted() {
@@ -126,14 +132,10 @@
           },
           getFileList() {
             axios
-              .get(
-                "https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBaVB1bTlHbnF5a01sOHdMVXRXQTBGRXhhck1iQnc=/root?expand=children"
-              )
+              .get(`${SHARE_URL}/download?path=/&files=validate.txt`)
               .then((r) => {
-                r.data["children"].forEach((e) => {
-                  this.files[e["name"]] = e["@content.downloadUrl"];
-                  this.dates.push(e["name"].split(".")[0]);
-                });
+                this.dates = r.data.split("\n");
+                console.log(this.dates);
               })
               .then(() => {
                 this.currentDate = this.dates[this.dates.length - 1];
