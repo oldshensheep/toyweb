@@ -53,7 +53,7 @@ function setVertexAttribArray(gl, glProgram, bufferData, type, attributeName, si
  *
  * @param gl {WebGL2RenderingContext}
  * @param glProgram {WebGLProgram}
- * @param image {Image}
+ * @param image {ArrayBufferView}
  * @param attributeName {string}
  */
 function setSampler2D(gl, glProgram, image, attributeName) {
