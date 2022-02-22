@@ -5,21 +5,21 @@
 html js 玩具  
 <https://oldshensheep.github.io/toyweb>
 
-### [LastFM Export](./lastfm-export)
+### [LastFM Export](./lastfm-export)<https://blog.oldshensheep.com/toyweb/lastfm-export/>
 
-导出 last.fm 的数据到csv.
+导出 last.fm 的数据到 csv.
 
-### [Playlist Compare](./playlist-compare)
+### [Playlist Compare](./playlist-compare)<https://blog.oldshensheep.com/toyweb/playlist-compare/>
 
-网易云音乐和QQ音乐的歌单比对。（不完善）
+网易云音乐和 QQ 音乐的歌单比对。（不完善）
 
-### [NCMDaily](./ncmdaily)
+### [NCMDaily](./ncmdaily)<https://blog.oldshensheep.com/toyweb/ncmdaily/>
 
 浏览我的网易云音乐每日推荐。
 
-### [Digital Image Processing](./dip)
+### [Digital Image Processing](./dip)<https://blog.oldshensheep.com/toyweb/dip/>
 
-数字图像处理。纯javascript。
+数字图像处理。纯 javascript。
 
 - 变成灰度图
 - 反转
