@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>歌单匹配</title>
     <link
       href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons"
       rel="stylesheet"
@@ -116,6 +116,30 @@
                 ></q-btn>
               </div>
             </q-form>
+            <div class="q-mt-lg">
+              <div>
+                你的歌单有<q-badge color="blue"> {{your_playlist_len}}</q-badge
+                >首歌
+              </div>
+              <div>
+                ta的歌单有
+                <q-badge color="red"> {{her_playlist_len}}</q-badge>首歌
+              </div>
+              <div>
+                你和ta有<q-badge color="green"> {{same.length}} </q-badge>
+                首相同的歌曲
+              </div>
+              <div>
+                相似度
+                <q-badge color="purple">
+                  {{(same.length*2/(your_playlist_len+her_playlist_len)*100).toFixed(2)}}%
+                </q-badge>
+                <div class="text-grey">
+                  计算公式 相同歌曲数量*2/(你的歌曲数量+ta的曲数量)
+                </div>
+              </div>
+            </div>
+
             <q-table
               class="q-mt-lg"
               row-key="id"

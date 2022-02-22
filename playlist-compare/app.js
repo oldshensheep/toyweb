@@ -66,27 +66,6 @@ const app = Vue.createApp({
         return true;
       },
     ];
-    const percentHer = computed(() =>
-      (
-        (her_playlist_len.value /
-          (her_playlist_len.value + your_playlist_len.value)) *
-        100
-      ).toFixed(2)
-    );
-    const percentYour = computed(() =>
-      (
-        (your_playlist_len.value /
-          (her_playlist_len.value + your_playlist_len.value)) *
-        100
-      ).toFixed(2)
-    );
-    const percentSame = computed(() =>
-      (
-        ((same.value.length * 2) /
-          (her_playlist_len.value + your_playlist_len.value)) *
-        100
-      ).toFixed(2)
-    );
 
     watch(accept, (accept) => {
       localStorage.setItem("accept", accept);
@@ -108,9 +87,6 @@ const app = Vue.createApp({
       her_platform,
       her_playlist_len,
       your_playlist_len,
-      percentHer,
-      percentYour,
-      percentSame,
       same,
       columns,
       options: [
@@ -171,8 +147,7 @@ const app = Vue.createApp({
       alert() {
         $q.dialog({
           title: "服务协议",
-          message:
-            "你发送给服务器的信息，会被保存在服务器上，并且用于数据分析。",
+          message: "你发送给服务器的信息会被保存在服务器上，并且用于数据分析。",
         });
       },
       onReset() {
