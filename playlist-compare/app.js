@@ -33,18 +33,20 @@ const columns = [
   },
 ];
 const { useQuasar } = Quasar;
-const { ref, watch } = Vue;
+const { ref, watch, computed } = Vue;
 
 const app = Vue.createApp({
   setup() {
     const $q = useQuasar();
-
+    const leftDrawerOpen = ref(false);
     const her_input = ref(localStorage.getItem("her_input"));
     const your_input = ref(localStorage.getItem("your_input"));
     const her_platform = ref("ncm");
     const your_platform = ref("ncm");
     const her_playlist = ref([]);
     const your_playlist = ref([]);
+    const her_playlist_len = ref(0);
+    const your_playlist_len = ref(0);
     const same = ref([]);
     const accept = ref(localStorage.getItem("accept") === "true");
     const message = "Hello Vue!";
@@ -64,6 +66,27 @@ const app = Vue.createApp({
         return true;
       },
     ];
+    const percentHer = computed(() =>
+      (
+        (her_playlist_len.value /
+          (her_playlist_len.value + your_playlist_len.value)) *
+        100
+      ).toFixed(2)
+    );
+    const percentYour = computed(() =>
+      (
+        (your_playlist_len.value /
+          (her_playlist_len.value + your_playlist_len.value)) *
+        100
+      ).toFixed(2)
+    );
+    const percentSame = computed(() =>
+      (
+        ((same.value.length * 2) /
+          (her_playlist_len.value + your_playlist_len.value)) *
+        100
+      ).toFixed(2)
+    );
 
     watch(accept, (accept) => {
       localStorage.setItem("accept", accept);
@@ -83,6 +106,11 @@ const app = Vue.createApp({
       idRules,
       your_platform,
       her_platform,
+      her_playlist_len,
+      your_playlist_len,
+      percentHer,
+      percentYour,
+      percentSame,
       same,
       columns,
       options: [
@@ -96,6 +124,10 @@ const app = Vue.createApp({
           disable: true,
         },
       ],
+      leftDrawerOpen,
+      toggleLeftDrawer() {
+        leftDrawerOpen.value = !leftDrawerOpen.value;
+      },
       async onSubmit() {
         if (accept.value !== true) {
           $q.notify({
@@ -120,16 +152,14 @@ const app = Vue.createApp({
             your_id = id_reg.exec(your_id)[0];
           }
 
-          her_playlist.value = await getPlaylist(her_id, her_platform.value);
-          your_playlist.value = await getPlaylist(your_id, your_platform.value);
+          // her_playlist.value = await getPlaylist(her_id, her_platform.value);
+          // your_playlist.value = await getPlaylist(your_id, your_platform.value);
 
-          same.value = await getSame(
-            your_playlist.value,
-            her_playlist.value,
-            your_platform.value,
-            her_platform.value
-          );
-
+          let response = await getSame_test(your_id, her_id);
+          same.value = response.common_songs;
+          her_playlist_len.value = response.her_playlist_len;
+          your_playlist_len.value = response.your_playlist_len;
+          console.log(same.value);
           $q.notify({
             color: "green-4",
             textColor: "white",
@@ -142,12 +172,15 @@ const app = Vue.createApp({
         $q.dialog({
           title: "服务协议",
           message:
-            "你发送给我的信息，我会把你的信息保存在服务器上，并且用于数据分析。",
+            "你发送给服务器的信息，会被保存在服务器上，并且用于数据分析。",
         });
       },
       onReset() {
         her_input.value = "";
         your_input.value = "";
+      },
+      open_external_link(url) {
+        open(url, (target = "_blank"));
       },
     };
   },

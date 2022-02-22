@@ -2,7 +2,7 @@ const APIurl = {
   ncm: "https://ncmapi.v2nd.com",
   qqm: "https://service-c41ch70i-1257843962.gz.apigw.tencentcs.com/release/json_proxy/https://c.y.qq.com/v8/fcg-bin/fcg_v8_playlist_cp.fcg?id=",
 };
-
+const SHEEP_API = "https://api.oldshensheep.com";
 const DEFAULT = {
   her_input:
     "分享oldshensheep创建的歌单「初音ミク」: http://music.163.com/playlist/5205779845/319475460/?userid=319475460 (来自@网易云音乐)",
@@ -138,4 +138,15 @@ async function getPlaylist(id, platform) {
 }
 async function getSongUrl(id) {
   return axios.get(`${APIurl.ncm}/song/url?id=${id}`);
+}
+
+async function getSame_test(
+  your_id,
+  her_id,
+  yourPlatfrom = "ncm",
+  herPlatfrom = "ncm"
+) {
+  return (
+    await fetch(`${SHEEP_API}/?your_id=${your_id}&her_id=${her_id}`)
+  ).json();
 }
