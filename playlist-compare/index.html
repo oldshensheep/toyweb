@@ -24,7 +24,7 @@
 
   <body>
     <div id="app">
-      <div class="q-pa-md q-mx-auto" style="max-width: 1000px;">
+      <div class="q-pa-md q-mx-auto" style="max-width: 1000px">
         <q-form @submit="onSubmit" @reset="onReset">
           <q-input
             filled
@@ -35,7 +35,7 @@
             :rules="idRules"
           ></q-input>
 
-          <div class="bg-grey-2 q-pa-sm rounded-borders flex items-center ">
+          <div class="bg-grey-2 q-pa-sm rounded-borders flex items-center">
             你的平台:
             <q-option-group
               v-model="your_platform"
@@ -63,8 +63,8 @@
           <div
             class="bg-grey-2 q-pa-sm rounded-borders flex items-center q-mt-lg"
           >
-            <q-toggle v-model="accept" label="我接受"></q-toggle
-            ><a href="http://www.example.com">服务协议</a>
+            <q-toggle v-model="accept" label="我接受"></q-toggle>
+            <div style="color: blue" @click="alert">服务协议</div>
           </div>
 
           <div class="q-mt-lg">
@@ -81,15 +81,14 @@
         <q-table
           class="q-mt-lg"
           row-key="id"
+          :filter="filter"
           :rows="same"
           :columns="columns"
-          :pagination="{   rowsPerPage: 0}"
+          :pagination="{rowsPerPage: 0}"
         >
           <template v-slot:body-cell-index="props">
             <q-td :props="props">
-              <div>
-                {{props.rowIndex+1}}
-              </div>
+              <div>{{props.rowIndex+1}}</div>
             </q-td>
           </template>
           <template v-slot:body-cell-name="props">
@@ -124,147 +123,6 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/quasar@2.5.5/dist/quasar.umd.prod.js"></script>
     <script src="./api.js"></script>
-    <script>
-      const id_reg = new RegExp("((?<=/playlist/)[0-9]*)|((?<=/?id=)[0-9]*)");
-      const columns = [
-        {
-          name: "index",
-          label: "序号",
-          align: "left",
-          sortable: true,
-        },
-        {
-          name: "id",
-          label: "id",
-          field: "id",
-          align: "left",
-          sortable: true,
-        },
-        {
-          name: "name",
-          label: "标题",
-          field: "name",
-          align: "left",
-          sortable: true,
-        },
-      ];
-      const { useQuasar } = Quasar;
-      const { ref } = Vue;
-
-      const app = Vue.createApp({
-        setup() {
-          const $q = useQuasar();
-
-          const her_input = ref(
-            "分享oldshensheep创建的歌单「初音ミク」: http://music.163.com/playlist/5205779845/319475460/?userid=319475460 (来自@网易云音乐)"
-          );
-          const your_input = ref(
-            "分享oldshensheep创建的歌单「初音ミク」: http://music.163.com/playlist/5205779845/319475460/?userid=319475460 (来自@网易云音乐)"
-          );
-          const her_platform = ref("ncm");
-          const your_platform = ref("ncm");
-          const her_playlist = ref([]);
-          const your_playlist = ref([]);
-          const same = ref([]);
-          const accept = ref(false);
-          const message = "Hello Vue!";
-
-          const idRules = [
-            (v) => {
-              if (!v) {
-                return "请输入id或链接";
-              }
-              if (v.length > 15) {
-                let d = id_reg.exec(v);
-                if (d === null) return "请输入正确的id或url";
-              }
-              if (v.length < 4) {
-                return "请输入正确的id或url";
-              }
-              return true;
-            },
-          ];
-          return {
-            her_input,
-            your_input,
-            accept,
-            message,
-            idRules,
-            your_platform,
-            her_platform,
-            same,
-            columns,
-            options: [
-              {
-                label: "网易云音乐",
-                value: "ncm",
-              },
-              {
-                label: "QQ音乐",
-                value: "qqm",
-                disable: true,
-              },
-            ],
-            async onSubmit() {
-              if (accept.value !== true) {
-                $q.notify({
-                  color: "red-5",
-                  textColor: "white",
-                  icon: "warning",
-                  message: "请先同意服务协议",
-                });
-              } else {
-                $q.notify({
-                  color: "green-4",
-                  textColor: "white",
-                  icon: "cloud_done",
-                  message: "正在查询",
-                });
-                let her_id = her_input.value;
-                let your_id = your_input.value;
-                if (her_id.length > 15) {
-                  her_id = id_reg.exec(her_id)[0];
-                }
-                if (your_id.length > 15) {
-                  your_id = id_reg.exec(your_id)[0];
-                }
-
-                her_playlist.value = await getPlaylist(
-                  her_id,
-                  her_platform.value
-                );
-                your_playlist.value = await getPlaylist(
-                  your_id,
-                  your_platform.value
-                );
-
-                same.value = await getSame(
-                  your_playlist.value,
-                  her_playlist.value,
-                  your_platform.value,
-                  her_platform.value
-                );
-
-                $q.notify({
-                  color: "green-4",
-                  textColor: "white",
-                  icon: "cloud_done",
-                  message: "查询完成",
-                });
-              }
-            },
-
-            onReset() {
-              name.value = null;
-              age.value = null;
-              accept.value = false;
-            },
-          };
-        },
-      });
-
-      app.use(Quasar);
-      app.mount("#app");
-    </script>
+    <script src="./app.js"></script>
   </body>
 </html>

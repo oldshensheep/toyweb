@@ -1,7 +1,13 @@
 const APIurl = {
   ncm: "https://ncmapi.v2nd.com",
-  qqm:
-    "https://service-c41ch70i-1257843962.gz.apigw.tencentcs.com/release/json_proxy/https://c.y.qq.com/v8/fcg-bin/fcg_v8_playlist_cp.fcg?id=",
+  qqm: "https://service-c41ch70i-1257843962.gz.apigw.tencentcs.com/release/json_proxy/https://c.y.qq.com/v8/fcg-bin/fcg_v8_playlist_cp.fcg?id=",
+};
+
+const DEFAULT = {
+  her_input:
+    "分享oldshensheep创建的歌单「初音ミク」: http://music.163.com/playlist/5205779845/319475460/?userid=319475460 (来自@网易云音乐)",
+  your_input:
+    "分享oldshensheep创建的歌单「初音ミク」: http://music.163.com/playlist/5205779845/319475460/?userid=319475460 (来自@网易云音乐)",
 };
 function check() {
   if (!localStorage.getItem("ncm_api_server")) {
@@ -64,23 +70,12 @@ async function getSongDetail(ids) {
   return (await fetch(`${APIurl.ncm}/song/detail?ids=${idsString}`)).json();
   //FIXME 歌单数量过多请求会失败，要分次请求，或者改/增加API
 }
-// 00 01 11 0代表网易云音乐，1代表QQ音乐---
-//  QQ音乐和网易云音乐的json的结构不同可以自动判断
-//
-// function getPlatfromType(playlist) {
-//     if (playlist[0] === undefined) {
-//         return "ncm";
-//     }
-//     return "qqm";
-// }
 
 //网易云音乐要获取歌名，所以要和QQ音乐分开
 async function getSame(yourPlaylist, herPlaylist, yourPlatfrom, herPlatfrom) {
   let same = [];
   console.log(yourPlaylist, herPlaylist, yourPlatfrom, herPlatfrom);
   if (yourPlatfrom === "ncm" && herPlatfrom === "ncm") {
-    console.log(yourPlaylist.length);
-    console.log(herPlaylist.length);
     for (let y = 0; y < yourPlaylist.length; y++) {
       for (let h = 0; h < herPlaylist.length; h++) {
         if (yourPlaylist[y].id === herPlaylist[h].id) {
@@ -135,7 +130,7 @@ async function getSame(yourPlaylist, herPlaylist, yourPlatfrom, herPlatfrom) {
 async function getPlaylist(id, platform) {
   let playlist = [];
   if (platform === "ncm") {
-    playlist =await getNCMPlaylist(id);
+    playlist = await getNCMPlaylist(id);
   } else if (platform === "qqm") {
     playlist = getQQMPlaylist(id);
   }
