@@ -81,6 +81,8 @@ const app = Vue.createApp({
       accept,
       message,
       idRules,
+      your: ref({ name: "昵称", id: "319475460" }),
+      her: ref({ name: "昵称", id: "319475460" }),
       your_platform,
       her_platform,
       her_playlist,
@@ -133,6 +135,8 @@ const app = Vue.createApp({
           same.value = response.common_songs;
           her_playlist.value = response.her_playlist;
           your_playlist.value = response.your_playlist;
+          this.your.value = response.your;
+          this.her.value = response.her;
           console.log(same.value);
           $q.notify({
             color: "green-4",

@@ -58,6 +58,9 @@
               <q-item-section> Github </q-item-section>
             </q-item>
             <div class="text-center q-mt-lg">我的歌单id：444265995</div>
+            <div class="text-center q-mt-lg">
+              你可以点击结果中的用户名进入网易云音乐主页
+            </div>
           </q-list>
         </q-drawer>
 
@@ -118,7 +121,13 @@
             </q-form>
             <div class="q-mt-lg">
               <div>
-                你的歌单
+                <q-badge color="blue-4">
+                  <a
+                    class="text-white"
+                    :href='"https://music.163.com/#/user/home?id=" +your.id'
+                    >{{your.name}}</a
+                  ></q-badge
+                >的歌单
                 <q-badge color="blue-5"> {{your_playlist.name}}</q-badge> 有
                 <q-badge color="blue"> {{your_playlist.len}} </q-badge> 首歌
                 相同歌曲占比
@@ -127,7 +136,13 @@
                 >
               </div>
               <div>
-                ta的歌单
+                <q-badge color="red-4">
+                  <a
+                    class="text-white"
+                    :href='"https://music.163.com/#/user/home?id=" +her.id'
+                    >{{her.name}}</a
+                  ></q-badge
+                >的歌单
                 <q-badge color="red-5"> {{her_playlist.name}} </q-badge>有
                 <q-badge color="red"> {{her_playlist.len}} </q-badge> 首歌
                 相同歌曲占比
