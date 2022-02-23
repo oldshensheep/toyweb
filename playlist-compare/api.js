@@ -5,7 +5,7 @@ const APIurl = {
 const SHEEP_API = "https://api.oldshensheep.com";
 const DEFAULT = {
   her_input:
-    "分享oldshensheep创建的歌单「初音ミク」: http://music.163.com/playlist/5205779845/319475460/?userid=319475460 (来自@网易云音乐)",
+    "分享oldshensheep创建的歌单「Music」: https://y.music.163.com/m/playlist?id=444265995&userid=319475460&creatorId=319475460 (来自@网易云音乐)",
   your_input:
     "分享oldshensheep创建的歌单「初音ミク」: http://music.163.com/playlist/5205779845/319475460/?userid=319475460 (来自@网易云音乐)",
 };
