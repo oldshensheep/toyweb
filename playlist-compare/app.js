@@ -43,6 +43,8 @@ const app = Vue.createApp({
     const your_input = ref(localStorage.getItem("your_input"));
     const her_platform = ref("ncm");
     const your_platform = ref("ncm");
+    const your = ref({ name: "昵称", id: "319475460" });
+    const her = ref({ name: "昵称", id: "319475460" });
     const her_playlist = ref({ name: "歌单名称", len: 0 });
     const your_playlist = ref({ name: "歌单名称", len: 0 });
     const same = ref([]);
@@ -81,8 +83,8 @@ const app = Vue.createApp({
       accept,
       message,
       idRules,
-      your: ref({ name: "昵称", id: "319475460" }),
-      her: ref({ name: "昵称", id: "319475460" }),
+      your,
+      her,
       your_platform,
       her_platform,
       her_playlist,
@@ -135,8 +137,8 @@ const app = Vue.createApp({
           same.value = response.common_songs;
           her_playlist.value = response.her_playlist;
           your_playlist.value = response.your_playlist;
-          this.your.value = response.your;
-          this.her.value = response.her;
+          your.value = response.your;
+          her.value = response.her;
           console.log(same.value);
           $q.notify({
             color: "green-4",
