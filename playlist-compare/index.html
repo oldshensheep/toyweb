@@ -50,7 +50,7 @@
               active
               clickable
               v-ripple
-              @click='open_external_link("https://github.com/oldshensheep")'
+              @click='open_external_link("https://github.com/oldshensheep/toyweb")'
             >
               <q-item-section avatar>
                 <q-icon name="launch" />
@@ -77,7 +77,7 @@
               ></q-input>
 
               <div class="bg-grey-2 q-pa-sm rounded-borders flex items-center">
-                你的平台:
+                你的平台（暂不支持QQ音乐）:
                 <q-option-group
                   v-model="your_platform"
                   :options="options"
@@ -94,7 +94,7 @@
                 :rules="idRules"
               ></q-input>
               <div class="bg-grey-2 q-pa-sm rounded-borders flex items-center">
-                ta的平台:
+                ta的平台（暂不支持QQ音乐）:
                 <q-option-group
                   v-model="her_platform"
                   :options="options"
@@ -105,7 +105,7 @@
                 class="bg-grey-2 q-pa-sm rounded-borders flex items-center q-mt-lg"
               >
                 <q-toggle v-model="accept" label="我接受"></q-toggle>
-                <div style="color: blue" @click="alert">服务协议</div>
+                <div style="color: blue" @click="alert">服务须知</div>
               </div>
 
               <div class="q-mt-lg">
