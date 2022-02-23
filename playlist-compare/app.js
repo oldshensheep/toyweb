@@ -43,10 +43,8 @@ const app = Vue.createApp({
     const your_input = ref(localStorage.getItem("your_input"));
     const her_platform = ref("ncm");
     const your_platform = ref("ncm");
-    const her_playlist = ref([]);
-    const your_playlist = ref([]);
-    const her_playlist_len = ref(0);
-    const your_playlist_len = ref(0);
+    const her_playlist = ref({ name: "歌单名称", len: 0 });
+    const your_playlist = ref({ name: "歌单名称", len: 0 });
     const same = ref([]);
     const accept = ref(localStorage.getItem("accept") === "true");
     const message = "Hello Vue!";
@@ -85,8 +83,8 @@ const app = Vue.createApp({
       idRules,
       your_platform,
       her_platform,
-      her_playlist_len,
-      your_playlist_len,
+      her_playlist,
+      your_playlist,
       same,
       columns,
       options: [
@@ -133,8 +131,8 @@ const app = Vue.createApp({
 
           let response = await getSame_test(your_id, her_id);
           same.value = response.common_songs;
-          her_playlist_len.value = response.her_playlist_len;
-          your_playlist_len.value = response.your_playlist_len;
+          her_playlist.value = response.her_playlist;
+          your_playlist.value = response.your_playlist;
           console.log(same.value);
           $q.notify({
             color: "green-4",

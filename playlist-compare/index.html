@@ -118,24 +118,34 @@
             </q-form>
             <div class="q-mt-lg">
               <div>
-                你的歌单有<q-badge color="blue"> {{your_playlist_len}}</q-badge
-                >首歌
+                你的歌单
+                <q-badge color="blue-5"> {{your_playlist.name}}</q-badge> 有
+                <q-badge color="blue"> {{your_playlist.len}} </q-badge> 首歌
+                相同歌曲占比
+                <q-badge color="blue">
+                  {{(same.length/your_playlist.len*100).toFixed(2)}}%</q-badge
+                >
               </div>
               <div>
-                ta的歌单有
-                <q-badge color="red"> {{her_playlist_len}}</q-badge>首歌
+                ta的歌单
+                <q-badge color="red-5"> {{her_playlist.name}} </q-badge>有
+                <q-badge color="red"> {{her_playlist.len}} </q-badge> 首歌
+                相同歌曲占比
+                <q-badge color="red">
+                  {{(same.length/her_playlist.len*100).toFixed(2)}}%
+                </q-badge>
               </div>
               <div>
-                你和ta有<q-badge color="green"> {{same.length}} </q-badge>
+                你和ta有 <q-badge color="green"> {{same.length}} </q-badge>
                 首相同的歌曲
               </div>
               <div>
                 相似度
                 <q-badge color="purple">
-                  {{(same.length*2/(your_playlist_len+her_playlist_len)*100).toFixed(2)}}%
+                  {{(same.length*2/(your_playlist.len+her_playlist.len)*100).toFixed(2)}}%
                 </q-badge>
                 <div class="text-grey">
-                  计算公式 相同歌曲数量*2/(你的歌曲数量+ta的曲数量)
+                  计算公式 相同歌曲数量*2/(你的歌曲数量+ta的歌曲数量)
                 </div>
               </div>
             </div>
