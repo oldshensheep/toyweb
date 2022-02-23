@@ -66,7 +66,29 @@ const app = Vue.createApp({
         return true;
       },
     ];
-
+    const msg = computed(() => {
+      let percent = Math.max(
+        same.value.length / your_playlist.value.len,
+        same.value.length / her_playlist.value.len
+      );
+      if (!Number.isNaN(percent)) {
+        if (percent < 0.01) {
+          return "虽然……但是何不尝试了解一下ta呢！";
+        } else if (percent < 0.04) {
+          return "不要辜负ta的好意！";
+        } else if (percent < 0.8) {
+          return "还差一点点，但是还是可以接受的！";
+        } else if (percent < 0.16) {
+          return "不错的结果，但还是要继续加油！";
+        } else if (percent < 0.32) {
+          return "原地结婚吧！";
+        } else {
+          return "？？？";
+        }
+      } else {
+        return "会是什么样的结果呢？";
+      }
+    });
     watch(accept, (accept) => {
       localStorage.setItem("accept", accept);
     });
@@ -90,6 +112,7 @@ const app = Vue.createApp({
       her_playlist,
       your_playlist,
       same,
+      msg,
       columns,
       options: [
         {
