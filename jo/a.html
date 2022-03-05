@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>What?</title>
+    <style type="text/css">
+      label {
+        margin-top: 10px;
+      }
+      .container {
+        margin-top: 20px;
+      }
+      img {
+        margin: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div style="display: flex">
+        <div style="display: flex; flex-direction: column">
+          <span>不能同时使用**运算和Math函数</span>
+
+          <label style="display: none;"
+            >RGBA独立设置<input id="" type="checkbox" checked />
+          </label>
+          <label
+            >固定透明通道为255（不透明）<input
+              oninput="inputChange()"
+              id="fixedAlpha"
+              type="checkbox"
+            />
+          </label>
+          <label>
+            预设函数
+            <select id="select" onchange="selectChange()">
+              <option value="x+y">v=x+y</option>
+              <option value="(x+y)/2">v=(x+y)/2</option>
+              <option value="x*y">v=x*y</option>
+              <option value="(x*y)/2">v=(x*y)/2</option>
+              <option value="x*y*Math.sqrt(x+y)">v=x*y*sqrt(x+y)</option>
+              <option value="x**y">v=x**y</option>
+            </select>
+          </label>
+
+          <label>
+            R = <input oninput="inputChange()" id="r" type="text" />
+          </label>
+          <label>
+            G = <input oninput="inputChange()" id="g" type="text" />
+          </label>
+          <label>
+            B = <input oninput="inputChange()" id="b" type="text" />
+          </label>
+          <label>
+            A = <input oninput="inputChange()" id="a" type="text" />
+          </label>
+        </div>
+
+        <img id="img" src="" />
+      </div>
+    </div>
+
+    <script>
+      "use strict";
+      let r = document.getElementById("r");
+      let g = document.getElementById("g");
+      let b = document.getElementById("b");
+      let a = document.getElementById("a");
+      let fixedAlpha = document.getElementById("fixedAlpha");
+      let select = document.getElementById("select");
+      let img = document.getElementById("img");
+      let canvas = document.createElement("canvas");
+
+      let imageWidth = 256;
+      let imageHeight = 256;
+      let imageData = new Uint8ClampedArray(imageHeight * imageWidth * 4);
+      let ctx = canvas.getContext("2d");
+      canvas.width = imageWidth;
+      canvas.height = imageHeight;
+      let canvasData = ctx.createImageData(canvas.width, canvas.height);
+
+      function setImage(r, g, b, a) {
+        // x**y会溢出 用BigInt计算，但是不能使用Math里的函数
+        if (/.*x\*\*y.*/.test(select.value)) {
+          for (let x = 0n; x < imageWidth; x++) {
+            for (let y = 0n; y < imageHeight; y++) {
+              let index = Number((x * 256n + y) * 4n);
+              imageData[index] = Number(eval(r) % 256n);
+              imageData[index + 1] = Number(eval(g) % 256n);
+              imageData[index + 2] = Number(eval(b) % 256n);
+              if (fixedAlpha.checked) {
+                imageData[index + 3] = 255;
+              } else {
+                imageData[index + 3] = Number(eval(a) % 256n);
+              }
+            }
+          }
+        } else {
+          for (let x = 0; x < imageWidth; x++) {
+            for (let y = 0; y < imageHeight; y++) {
+              let index = (x * 256 + y) * 4;
+              imageData[index] = eval(r) % 256;
+              imageData[index + 1] = eval(g) % 256;
+              imageData[index + 2] = eval(b) % 256;
+              if (fixedAlpha.checked) {
+                imageData[index + 3] = 255;
+              } else {
+                imageData[index + 3] = eval(a) % 256;
+              }
+            }
+          }
+        }
+        canvasData.data.set(imageData);
+        ctx.putImageData(canvasData, 0, 0);
+        img.src = canvas.toDataURL();
+      }
+      function inputChange() {
+        setImage(r.value, g.value, b.value, a.value);
+      }
+
+      function selectChange() {
+        let v = select.value;
+        console.log(v);
+        setImage(v, v, v, v);
+        r.value = v;
+        g.value = v;
+        b.value = v;
+        a.value = v;
+      }
+      select.value = "x*y";
+      selectChange();
+    </script>
+  </body>
+</html>
