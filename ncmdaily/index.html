@@ -134,7 +134,7 @@
             axios
               .get(`${SHARE_URL}/download?path=/&files=validate.txt`)
               .then((r) => {
-                this.dates = r.data.split("\n");
+                this.dates = r.data.split(/\n|\r\n/).filter((e) => e.length > 0);
                 console.log(this.dates);
               })
               .then(() => {
