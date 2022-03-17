@@ -8,6 +8,12 @@ if (localStorage.getItem("your_input") === null) {
 if (localStorage.getItem("accept") === null) {
   localStorage.setItem("accept", "false");
 }
+if (localStorage.getItem("her_platform") === null) {
+  localStorage.setItem("her_platform", DEFAULT.her_platform);
+}
+if (localStorage.getItem("your_platform") === null) {
+  localStorage.setItem("your_platform", DEFAULT.your_platform);
+}
 
 const id_reg = new RegExp("((?<=/playlist/)[0-9]*)|((?<=/?id=)[0-9]*)");
 const columns = [
@@ -41,8 +47,8 @@ const app = Vue.createApp({
     const leftDrawerOpen = ref(false);
     const her_input = ref(localStorage.getItem("her_input"));
     const your_input = ref(localStorage.getItem("your_input"));
-    const her_platform = ref("ncm");
-    const your_platform = ref("ncm");
+    const her_platform = ref(localStorage.getItem("her_platform"));
+    const your_platform = ref(localStorage.getItem("your_platform"));
     const your = ref({ name: "昵称", id: "319475460" });
     const her = ref({ name: "昵称", id: "319475460" });
     const her_playlist = ref({ name: "歌单名称", len: 0 });
@@ -81,12 +87,28 @@ const app = Vue.createApp({
         } else if (percent < 0.32) {
           return "原地结婚吧！";
         } else {
-          return "？？？";
+          return "应该是同一个人吧？？？";
         }
       } else {
         return "会是什么样的结果呢？";
       }
     });
+    watch(her_input, (her_input) => {
+      if (!her_input) return;
+      if (her_input.match(/.*163\.com.*/)) {
+        her_platform.value = "ncm"
+      } else if (her_input.match(/.*qq\.com.*/)) {
+        her_platform.value = "qqm"
+      }
+    })
+    watch(your_input, (your_input) => {
+      if (!your_input) return;
+      if (your_input.match(/.*163\.com.*/)) {
+        your_platform.value = "ncm"
+      } else if (your_input.match(/.*qq\.com.*/)) {
+        your_platform.value = "qqm"
+      }
+    })
     watch(accept, (accept) => {
       localStorage.setItem("accept", accept);
     });
@@ -95,6 +117,12 @@ const app = Vue.createApp({
     });
     watch(your_input, (your_input) => {
       localStorage.setItem("your_input", your_input || "");
+    });
+    watch(her_platform, (her_platform) => {
+      localStorage.setItem("her_platform", her_platform || "ncm");
+    });
+    watch(your_platform, (your_platform) => {
+      localStorage.setItem("your_platform", your_platform || "ncm");
     });
     return {
       filter: ref(""),
@@ -120,7 +148,6 @@ const app = Vue.createApp({
         {
           label: "QQ音乐",
           value: "qqm",
-          disable: true,
         },
       ],
       leftDrawerOpen,
@@ -153,8 +180,18 @@ const app = Vue.createApp({
 
           // her_playlist.value = await getPlaylist(her_id, her_platform.value);
           // your_playlist.value = await getPlaylist(your_id, your_platform.value);
-
-          let response = await getSame_test(your_id, her_id);
+          let response = null
+          try {
+            response = await getSame_test(your_id, her_id, your_platform.value, her_platform.value);
+          } catch (e) {
+            $q.notify({
+              color: "red-5",
+              textColor: "white",
+              icon: "warning",
+              message: "查询失败",
+            });
+            return;
+          }
           same.value = response.common_songs;
           her_playlist.value = response.her_playlist;
           your_playlist.value = response.your_playlist;

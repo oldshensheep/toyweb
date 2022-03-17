@@ -5,9 +5,11 @@ const APIurl = {
 const SHEEP_API = "https://api.oldshensheep.com";
 const DEFAULT = {
   her_input:
-    "分享oldshensheep创建的歌单「Music」: https://y.music.163.com/m/playlist?id=444265995&userid=319475460&creatorId=319475460 (来自@网易云音乐)",
+    "https://i.y.qq.com/n2/m/share/details/taoge.html?platform=11&appshare=android_qq&appversion=11050108&hosteuin=oKosNe6kNKoAoc**&id=8399616661&ADTAG=qfshare",
+  her_platform: "qqm",
   your_input:
-    "分享oldshensheep创建的歌单「初音ミク」: http://music.163.com/playlist/5205779845/319475460/?userid=319475460 (来自@网易云音乐)",
+    "分享oldshensheep创建的歌单「oldshensheep喜欢的音乐」: http://music.163.com/playlist/444265995/319475460/?userid=319475460 (来自@网易云音乐)",
+  your_platform: "ncm",
 };
 function check() {
   if (!localStorage.getItem("ncm_api_server")) {
@@ -147,6 +149,6 @@ async function getSame_test(
   herPlatfrom = "ncm"
 ) {
   return (
-    await fetch(`${SHEEP_API}/?your_id=${your_id}&her_id=${her_id}`)
+    await fetch(`${SHEEP_API}/?your_id=${your_id}&her_id=${her_id}&your_platform=${yourPlatfrom}&her_platform=${herPlatfrom}`)
   ).json();
 }
