@@ -1,179 +1,148 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css"
-      rel="stylesheet"
-    />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
-    />
-  </head>
 
-  <body>
-    <div id="app">
-      <v-app class="" id="app">
-        <v-main>
-          <v-card>
-            <v-card-title>
-              LastFM-Export
-              <v-spacer></v-spacer>
-              <v-text-field
-                label="username"
-                v-model="username"
-                :disabled="username_disabled"
-                clearable
-              ></v-text-field>
-              <v-spacer></v-spacer>
-              <v-btn @click="get" :disabled="get_disabled" depressed>get</v-btn>
-              <v-spacer></v-spacer>
-              <v-btn @click="export2csv" depressed>Export to CSV File</v-btn>
-              <v-spacer></v-spacer>
-              <v-text-field
-                v-model="search"
-                append-icon="mdi-magnify"
-                label="Search"
-                single-line
-                hide-details
-              ></v-text-field>
-            </v-card-title>
-            <v-progress-linear
-              :value="finishedPages/totalPages*100"
-              height="25"
-              color="cyan"
-            >
-              <strong
-                >{{Math.ceil(finishedPages/totalPages*100)}}%
-                ({{finishedPages}}/{{totalPages}})</strong
-              >
-            </v-progress-linear>
-            <v-data-table
-              :headers="headers"
-              :items="trackList"
-              :search="search"
-              :items-per-page="200"
-            ></v-data-table>
-          </v-card>
-        </v-main>
-      </v-app>
-    </div>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
+</head>
 
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script>
-      new Vue({
-        el: "#app",
-        vuetify: new Vuetify(),
-        data: {
-          search: "",
-          username: "oldshensheep",
-          totalPages: 1,
-          finishedPages: 0,
-          get_disabled: false,
-          username_disabled: false,
-          trackList: [],
-          headers: [
-            { text: "SongName", value: "name" },
-            { text: "Artist", value: "artist" },
-            { text: "Album", value: "album" },
-            { text: "Date", value: "date" },
-            { text: "Loved", value: "loved" },
-          ],
+<body>
+  <div id="app">
+    <v-app class="" id="app">
+      <v-main>
+        <v-card>
+          <v-card-title>
+            LastFM-Export
+            <v-spacer></v-spacer>
+            <v-text-field label="username" v-model="username" :disabled="username_disabled" clearable></v-text-field>
+            <v-spacer></v-spacer>
+            <v-btn @click="get" :disabled="get_disabled" depressed>get</v-btn>
+            <v-spacer></v-spacer>
+            <v-btn @click="export2csv" depressed>Export to CSV File</v-btn>
+            <v-spacer></v-spacer>
+            <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details>
+            </v-text-field>
+          </v-card-title>
+          <v-progress-linear :value="finishedPages/totalPages*100" height="25" color="cyan">
+            <strong>{{Math.ceil(finishedPages/totalPages*100)}}%
+              ({{finishedPages}}/{{totalPages}})</strong>
+          </v-progress-linear>
+          <v-data-table :headers="headers" :items="trackList" :search="search" :items-per-page="200"></v-data-table>
+        </v-card>
+      </v-main>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    new Vue({
+      el: "#app",
+      vuetify: new Vuetify(),
+      data: {
+        search: "",
+        username: "oldshensheep",
+        totalPages: 1,
+        finishedPages: 0,
+        get_disabled: false,
+        username_disabled: false,
+        trackList: [],
+        headers: [
+          { text: "SongName", value: "name" },
+          { text: "Artist", value: "artist" },
+          { text: "Album", value: "album" },
+          { text: "Date", value: "date" },
+          { text: "Loved", value: "loved" },
+        ],
+      },
+      methods: {
+        CSVStringConverter(s) {
+          if (s.includes("|")) {
+            return '"'.concat(s).concat('"');
+          }
+          return s;
         },
-        methods: {
-          CSVStringConverter(s) {
-            if (s.includes("|")) {
-              return '"'.concat(s).concat('"');
+        export2csv() {
+          let elementA = document.createElement("a");
+          elementA.download = this.username + ".csv";
+          elementA.style.display = "none";
+          let csvString = "songName|artist|album|date|loved\n";
+          this.trackList.forEach((e) => {
+            csvString += `${this.CSVStringConverter(
+              e["name"]
+            )}|${this.CSVStringConverter(
+              e["artist"]
+            )}|${this.CSVStringConverter(e["album"])}|${new Date(
+              e["date"]
+            ).valueOf()}|${e["loved"]}\n`;
+          });
+          let blob = new Blob([csvString], {
+            type: "text/csv",
+          });
+          elementA.href = URL.createObjectURL(blob);
+          document.body.appendChild(elementA);
+          elementA.click();
+          document.body.removeChild(elementA);
+        },
+        async get() {
+          this.totalPages = 1;
+          this.finishedPages = 0;
+          this.trackList = [];
+          this.get_disabled = true;
+          this.username_disabled = true;
+          this.getall(
+            this.username,
+            "527db47cdc2f13808ed4e5c595a47e84"
+          ).finally(() => {
+            this.get_disabled = false;
+            this.username_disabled = false;
+          });
+        },
+        async getRecentTracks(user, api_key, page) {
+          let response = await axios.get(
+            "https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks",
+            {
+              params: {
+                format: "json",
+                limit: "200",
+                extended: 1,
+                api_key: api_key,
+                user: user,
+                page: page,
+              },
             }
-            return s;
-          },
-          export2csv() {
-            let elementA = document.createElement("a");
-            elementA.download = this.username + ".csv";
-            elementA.style.display = "none";
-            let csvString = "songName|artist|album|date|loved\n";
-            this.trackList.forEach((e) => {
-              csvString += `${this.CSVStringConverter(
-                e["name"]
-              )}|${this.CSVStringConverter(
-                e["artist"]
-              )}|${this.CSVStringConverter(e["album"])}|${new Date(
-                e["date"]
-              ).valueOf()}|${e["loved"]}\n`;
+          );
+          this.finishedPages++;
+          return response.data;
+        },
+        responsetify(response) {
+          response["recenttracks"]["track"].forEach((element) => {
+            this.trackList.push({
+              name: element["name"],
+              artist: element["artist"]["name"],
+              album: element["album"]["#text"],
+              date: element["date"] ? element["date"]["#text"] : "",
+              loved: element["loved"],
             });
-            let blob = new Blob([csvString], {
-              type: "text/csv",
-            });
-            elementA.href = URL.createObjectURL(blob);
-            document.body.appendChild(elementA);
-            elementA.click();
-            document.body.removeChild(elementA);
-          },
-          async get() {
-            this.totalPages = 1;
-            this.finishedPages = 0;
-            this.trackList = [];
-            this.get_disabled = true;
-            this.username_disabled = true;
-            this.getall(
-              this.username,
-              "527db47cdc2f13808ed4e5c595a47e84"
-            ).finally(() => {
-              this.get_disabled = false;
-              this.username_disabled = false;
-            });
-          },
-          async getRecentTracks(user, api_key, page) {
-            let response = await axios.get(
-              "https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks",
-              {
-                params: {
-                  format: "json",
-                  limit: "200",
-                  extended: 1,
-                  api_key: api_key,
-                  user: user,
-                  page: page,
-                },
-              }
-            );
-            this.finishedPages++;
-            return response.data;
-          },
-          responsetify(response) {
-            response["recenttracks"]["track"].forEach((element) => {
-              this.trackList.push({
-                name: element["name"],
-                artist: element["artist"]["name"],
-                album: element["album"]["#text"],
-                date: element["date"]["#text"] ? element["date"]["#text"] : "",
-                loved: element["loved"],
-              });
-            });
-          },
-          async getall(user, api_key) {
-            let response = await this.getRecentTracks(user, api_key, 1);
+          });
+        },
+        async getall(user, api_key) {
+          let response = await this.getRecentTracks(user, api_key, 1);
+          this.responsetify(response);
+          this.totalPages = Number(
+            response["recenttracks"]["@attr"]["totalPages"]
+          );
+          for (let index = 2; index <= this.totalPages; index++) {
+            let response = await this.getRecentTracks(user, api_key, index);
             this.responsetify(response);
-            this.totalPages = Number(
-              response["recenttracks"]["@attr"]["totalPages"]
-            );
-            for (let index = 2; index <= this.totalPages; index++) {
-              let response = await this.getRecentTracks(user, api_key, index);
-              this.responsetify(response);
-            }
-          },
+          }
         },
-      });
-    </script>
-  </body>
+      },
+    });
+  </script>
+</body>
+
 </html>
