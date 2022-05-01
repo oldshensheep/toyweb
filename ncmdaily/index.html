@@ -1,164 +1,137 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css"
-      rel="stylesheet"
-    />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
-    />
-  </head>
 
-  <body>
-    <div id="app">
-      <v-app class="" id="app">
-        <v-main>
-          <v-card>
-            <v-card-title>
-              <v-menu :close-on-content-click="false">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn color="primary" v-bind="attrs" v-on="on">
-                    选择日期
-                  </v-btn>
-                </template>
-                <v-date-picker
-                  v-model="currentDate"
-                  :allowed-dates="allowedDates"
-                ></v-date-picker>
-              </v-menu>
-              <div class="mx-4">{{currentDate}}</div>
-              <v-spacer></v-spacer>
-              <v-text-field
-                v-model="search"
-                append-icon="mdi-magnify"
-                label="Search"
-                single-line
-                hide-details
-              ></v-text-field>
-            </v-card-title>
-            <v-data-table
-              :headers="headers"
-              :items="plsc"
-              :search="search"
-              :disable-pagination="true"
-              :hide-default-footer="true"
-            >
-              <template v-slot:item.id="{ item }">
-                <v-icon class="mr-2" @click="editItem(item)">
-                  mdi-play-circle
-                </v-icon>
-                <v-icon @click="openSongPage(item.id)"> mdi-eye </v-icon>
-              </template>
-              <template v-slot:no-data>
-                <v-btn color="primary" @click="getFileList()"> Refresh </v-btn>
-              </template>
-            </v-data-table>
-          </v-card>
-        </v-main>
-      </v-app>
-    </div>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/iconfont/material-icons.min.css"
+    rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.6.4/vuetify.min.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
+</head>
 
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fflate/umd/index.js"></script>
-    <script>
-      function sec2text00_00(currentTime) {
-        let m = Math.floor(currentTime / 60);
-        let s = Math.round(currentTime % 60);
-        return `${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
-      }
-      SHARE_URL = "https://cd.oldshensheep.com/s/BTHF3RCqoncSQAN";
-      new Vue({
-        el: "#app",
-        vuetify: new Vuetify(),
-        data: {
-          search: "",
-          headers: [
-            { text: "歌曲标题", value: "name" },
-            { text: "时长", value: "dt" },
-            { text: "歌手", value: "ar" },
-            { text: "专辑", value: "al" },
-            { text: "reason", value: "reason" },
-            { text: "Actions", value: "id", sortable: false, width: "10%" },
-          ],
-          dates: [],
-          pls: [],
-          currentDate: "",
-        },
-        computed: {
-          plsc() {
-            let spls = [];
-            this.pls.forEach((e) => {
-              spls.push({
-                name: e["name"],
-                dt: sec2text00_00(e["dt"] / 1000),
-                ar: e["ar"].map((x) => x["name"]).join("/"),
-                al: e["al"]["name"],
-                reason: e["reason"],
-                id: e["id"],
-              });
+<body>
+  <div id="app">
+    <v-app class="" id="app">
+      <v-main>
+        <v-card>
+          <v-card-title>
+            <v-menu :close-on-content-click="false">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn color="primary" v-bind="attrs" v-on="on">
+                  选择日期
+                </v-btn>
+              </template>
+              <v-date-picker v-model="currentDate" :allowed-dates="allowedDates"></v-date-picker>
+            </v-menu>
+            <div class="mx-4">{{currentDate}}</div>
+            <v-spacer></v-spacer>
+            <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details>
+            </v-text-field>
+          </v-card-title>
+          <v-data-table :headers="headers" :items="plsc" :search="search" :disable-pagination="true"
+            :hide-default-footer="true">
+            <template v-slot:item.id="{ item }">
+              <v-icon class="mr-2" @click="editItem(item)">
+                mdi-play-circle
+              </v-icon>
+              <v-icon @click="openSongPage(item.id)"> mdi-eye </v-icon>
+            </template>
+            <template v-slot:no-data>
+              <v-btn color="primary" @click="getFileList()"> Refresh </v-btn>
+            </template>
+          </v-data-table>
+        </v-card>
+      </v-main>
+    </v-app>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.6.4/vuetify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fflate/umd/index.js"></script>
+  <script>
+    function sec2text00_00(currentTime) {
+      let m = Math.floor(currentTime / 60);
+      let s = Math.round(currentTime % 60);
+      return `${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
+    }
+    SHARE_URL = "https://webdav.oldshensheep.com/rclone/ncmdaily";
+    new Vue({
+      el: "#app",
+      vuetify: new Vuetify(),
+      data: {
+        search: "",
+        headers: [
+          { text: "歌曲标题", value: "name" },
+          { text: "时长", value: "dt" },
+          { text: "歌手", value: "ar" },
+          { text: "专辑", value: "al" },
+          { text: "reason", value: "reason" },
+          { text: "Actions", value: "id", sortable: false, width: "10%" },
+        ],
+        dates: [],
+        pls: [],
+        currentDate: "",
+      },
+      computed: {
+        plsc() {
+          let spls = [];
+          this.pls.forEach((e) => {
+            spls.push({
+              name: e["name"],
+              dt: sec2text00_00(e["dt"] / 1000),
+              ar: e["ar"].map((x) => x["name"]).join("/"),
+              al: e["al"]["name"],
+              reason: e["reason"],
+              id: e["id"],
             });
-            return spls;
-          },
+          });
+          return spls;
         },
-        watch: {
-          currentDate(n, o) {
-            console.log(n, o);
-            date = n.split("-");
-            year = date[0];
-            month = date[1];
-            this.getpls(
-              `${SHARE_URL}/download?path=/${year}/${month}&files=${n}.json.gz`
-            );
-          },
+      },
+      watch: {
+        currentDate(n, o) {
+          console.log(n, o);
+          date = n.split("-");
+          year = date[0];
+          month = date[1];
+          this.getpls(
+            `${SHARE_URL}/${year}/${month}/${n}.json.gz`
+          );
         },
-        mounted() {
-          this.getFileList();
+      },
+      mounted() {
+        this.getFileList();
+      },
+      methods: {
+        openSongPage(id) {
+          window.open("https://music.163.com/song?id=" + id);
         },
-        methods: {
-          openSongPage(id) {
-            window.open("https://music.163.com/song?id=" + id);
-          },
-          getFileList() {
-            axios
-              .get(`${SHARE_URL}/download?path=/&files=validate.txt`)
-              .then((r) => {
-                this.dates = r.data.split(/\n|\r\n/).filter((e) => e.length > 0);
-                console.log(this.dates);
-              })
-              .then(() => {
-                this.currentDate = this.dates[this.dates.length - 1];
-              });
-          },
-          getpls(url) {
-            axios
-              .get(url, {
-                responseType: "arraybuffer",
-              })
-              .then((r) => {
-                this.pls = JSON.parse(
-                  fflate.strFromU8(
-                    fflate.decompressSync(new Uint8Array(r.data))
-                  )
-                )["data"]["dailySongs"];
-              });
-          },
-          allowedDates(val) {
-            return this.dates.includes(val);
-          },
+        getFileList() {
+          fetch(`${SHARE_URL}/validate.txt`)
+            .then(response => response.text())
+            .then((r) => {
+              this.dates = r.split(/\n|\r\n/).filter((e) => e.length > 0);
+              console.log(this.dates);
+              this.currentDate = this.dates[this.dates.length - 1];
+            });
         },
-      });
-    </script>
-  </body>
+        getpls(url) {
+          fetch(url)
+            .then(response => response.arrayBuffer())
+            .then((r) => {
+              this.pls = JSON.parse(
+                fflate.strFromU8(
+                  fflate.decompressSync(new Uint8Array(r))
+                )
+              )["data"]["dailySongs"];
+            });
+        },
+        allowedDates(val) {
+          return this.dates.includes(val);
+        },
+      },
+    });
+  </script>
+</body>
+
 </html>

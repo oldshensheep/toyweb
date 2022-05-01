@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Title</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <style>
     #canvas {
@@ -13,54 +14,55 @@
         /*border: 1px solid;*/
     }
 </style>
+
 <body>
-<canvas id="canvas"></canvas>
-<input type="file" id="file" accept="audio/*">
-<button onclick="play()">Play</button>
-<script src="../assets/lib/sgl.js"></script>
-<script>
-    let file = document.getElementById("file");
-    let canvas = document.getElementById("canvas")
+    <canvas id="canvas"></canvas>
+    <input type="file" id="file" accept="audio/*">
+    <button onclick="play()">Play</button>
+    <script src="../assets/lib/sgl.js"></script>
+    <script>
+        let file = document.getElementById("file");
+        let canvas = document.getElementById("canvas")
 
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-    let gl = canvas.getContext("webgl2")
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+        let gl = canvas.getContext("webgl2")
 
-    let audioCtx = new window.AudioContext();
+        let audioCtx = new window.AudioContext();
 
-    let audio = createAudio("https://cd.oldshensheep.com/s/HGo8cFAfNLnY34N/download/%E3%80%90%E5%8E%9F%E7%A5%9E%E3%80%91%E7%A5%9E%E9%87%8C%E7%BB%AB%E5%8D%8E%E3%80%8C%E7%99%BD%E9%B9%AD%E5%BD%92%E5%BA%AD%E3%80%8D.flac", true);
-    let source = audioCtx.createMediaElementSource(audio);
+        let audio = createAudio("https://webdav.oldshensheep.com/rclone/web/%E3%80%90%E5%8E%9F%E7%A5%9E%E3%80%91%E7%A5%9E%E9%87%8C%E7%BB%AB%E5%8D%8E%E3%80%8C%E7%99%BD%E9%B9%AD%E5%BD%92%E5%BA%AD%E3%80%8D.flac", true);
+        let source = audioCtx.createMediaElementSource(audio);
 
-    let options = {
-        'fftSize': 2048,
-        'maxDecibels': -30,
-        'minDecibels': -100,
-        'smoothingTimeConstant': 0.8
-    }
-    let analyser = new AnalyserNode(audioCtx, options)
+        let options = {
+            'fftSize': 2048,
+            'maxDecibels': -30,
+            'minDecibels': -100,
+            'smoothingTimeConstant': 0.8
+        }
+        let analyser = new AnalyserNode(audioCtx, options)
 
-    console.log(audioCtx, analyser)
+        console.log(audioCtx, analyser)
 
-    let binCount = analyser.frequencyBinCount;
-    let columnWidth = 16;
-    let columnNum = binCount / columnWidth;
-    let x = new Float32Array(columnNum * 12) //12 为一个矩形所需的点数*2
-    let yy = new Uint8Array(binCount);
+        let binCount = analyser.frequencyBinCount;
+        let columnWidth = 16;
+        let columnNum = binCount / columnWidth;
+        let x = new Float32Array(columnNum * 12) //12 为一个矩形所需的点数*2
+        let yy = new Uint8Array(binCount);
 
-    let xx = 1 / columnNum;
-    for (let i = 0; i < columnNum * 12; i += 12) {
-        x[i] = xx * i / 4 - 1
-        x[i + 2] = xx * (i + 11) / 4 - 1
-        x[i + 4] = xx * i / 4 - 1
-        x[i + 6] = xx * (i + 11) / 4 - 1
-        x[i + 8] = xx * (i + 11) / 4 - 1
-        x[i + 10] = xx * i / 4 - 1
-    }
+        let xx = 1 / columnNum;
+        for (let i = 0; i < columnNum * 12; i += 12) {
+            x[i] = xx * i / 4 - 1
+            x[i + 2] = xx * (i + 11) / 4 - 1
+            x[i + 4] = xx * i / 4 - 1
+            x[i + 6] = xx * (i + 11) / 4 - 1
+            x[i + 8] = xx * (i + 11) / 4 - 1
+            x[i + 10] = xx * i / 4 - 1
+        }
 
-    console.log(x)
-    console.log(binCount)
+        console.log(x)
+        console.log(binCount)
 
-    let vertexShaderSource = `#version 300 es
+        let vertexShaderSource = `#version 300 es
     in vec2 x;
     out vec4 v_color;
 
@@ -77,7 +79,7 @@
     }
     `
 
-    let fragmentShaderSource = `#version 300 es
+        let fragmentShaderSource = `#version 300 es
      precision highp float;
 
      in vec4 v_color;
@@ -86,61 +88,62 @@
       OutColor = v_color;
      }
     `
-    file.onchange = function () {
-        let fr = new FileReader();
-        fr.readAsDataURL(document.getElementById("file").files[0]);
-        fr.onload = e => {
-            audioCtx.resume()
-            audio.src = e.target.result
-            audio.play();
-        };
-    }
-
-    let glProgram = initShader(gl, vertexShaderSource, fragmentShaderSource);
-
-
-    function play() {
-        // The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page.
-        audioCtx.resume()
-        source.connect(analyser);
-        analyser.connect(audioCtx.destination);
-        audio.play();
-        render()
-
-    }
-
-    function createAudio(src, loop) {
-        let audio = new Audio(src);
-        audio.loop = loop || true;
-        audio.crossOrigin = "anonymous";
-        audio.load();
-        return audio;
-    }
-
-
-    function render() {
-        analyser.getByteFrequencyData(yy)
-        for (let i = 0; i < columnNum; i++) {
-            let sum = 0;
-            for (let j = 0; j < columnWidth; j++) {
-                sum += yy[i * columnWidth + j]
-            }
-            sum = (sum / columnWidth / 255) * 2 - 1
-            x[i * 12 + 1] = sum
-            x[i * 12 + 3] = sum
-            x[i * 12 + 5] = -1
-            x[i * 12 + 7] = -1
-            x[i * 12 + 9] = sum
-            x[i * 12 + 11] = -1
+        file.onchange = function () {
+            let fr = new FileReader();
+            fr.readAsDataURL(document.getElementById("file").files[0]);
+            fr.onload = e => {
+                audioCtx.resume()
+                audio.src = e.target.result
+                audio.play();
+            };
         }
 
-        setVertexAttribArray(gl, glProgram, x, gl.FLOAT, "x", 2, false, gl.DYNAMIC_DRAW)
-        gl.drawArrays(gl.TRIANGLES, 0, columnNum * 12 / 2)
-        requestAnimationFrame(render)
-    }
+        let glProgram = initShader(gl, vertexShaderSource, fragmentShaderSource);
 
-    render()
 
-</script>
+        function play() {
+            // The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page.
+            audioCtx.resume()
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            audio.play();
+            render()
+
+        }
+
+        function createAudio(src, loop) {
+            let audio = new Audio(src);
+            audio.loop = loop || true;
+            audio.crossOrigin = "anonymous";
+            audio.load();
+            return audio;
+        }
+
+
+        function render() {
+            analyser.getByteFrequencyData(yy)
+            for (let i = 0; i < columnNum; i++) {
+                let sum = 0;
+                for (let j = 0; j < columnWidth; j++) {
+                    sum += yy[i * columnWidth + j]
+                }
+                sum = (sum / columnWidth / 255) * 2 - 1
+                x[i * 12 + 1] = sum
+                x[i * 12 + 3] = sum
+                x[i * 12 + 5] = -1
+                x[i * 12 + 7] = -1
+                x[i * 12 + 9] = sum
+                x[i * 12 + 11] = -1
+            }
+
+            setVertexAttribArray(gl, glProgram, x, gl.FLOAT, "x", 2, false, gl.DYNAMIC_DRAW)
+            gl.drawArrays(gl.TRIANGLES, 0, columnNum * 12 / 2)
+            requestAnimationFrame(render)
+        }
+
+        render()
+
+    </script>
 </body>
+
 </html>

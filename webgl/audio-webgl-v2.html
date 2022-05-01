@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Title</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <style>
     #canvas {
@@ -13,72 +14,73 @@
         /*border: 1px solid;*/
     }
 </style>
+
 <body>
-<canvas id="canvas"></canvas>
-<input type="file" id="file" accept="audio/*">
-<label for="input_width">线宽：</label><input type="number" id="input_width">
-<button onclick="play()">Play</button>
-<script src="../assets/lib/sgl.js"></script>
-<script>
-    let file = document.getElementById("file");
-    let canvas = document.getElementById("canvas")
-    let input_width = document.getElementById("input_width");
-    input_width.onchange = function () {
-        console.log(Number(input_width.value));
-        columnWidth = Number(input_width.value)
-        columnNum = binCount / columnWidth;
-        x = new Float32Array(columnNum * 2)
-        y = new Uint8Array(columnNum * 2);
-        xx = 1 / columnNum;
+    <canvas id="canvas"></canvas>
+    <input type="file" id="file" accept="audio/*">
+    <label for="input_width">线宽：</label><input type="number" id="input_width">
+    <button onclick="play()">Play</button>
+    <script src="../assets/lib/sgl.js"></script>
+    <script>
+        let file = document.getElementById("file");
+        let canvas = document.getElementById("canvas")
+        let input_width = document.getElementById("input_width");
+        input_width.onchange = function () {
+            console.log(Number(input_width.value));
+            columnWidth = Number(input_width.value)
+            columnNum = binCount / columnWidth;
+            x = new Float32Array(columnNum * 2)
+            y = new Uint8Array(columnNum * 2);
+            xx = 1 / columnNum;
+            x[0] = -1
+            for (let i = 1; i < columnNum; i++) {
+                x[i * 2] = xx * 2 * i - 1
+                x[i * 2 - 1] = xx * 2 * i - 1
+            }
+            x[columnNum * 2 - 1] = 1
+            setVertexAttribArray(gl, glProgram, x, gl.FLOAT, "x", 1, false)
+
+        }
+
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+        let gl = canvas.getContext("webgl2")
+
+        let audioCtx = new window.AudioContext();
+
+        let audio = createAudio("https://webdav.oldshensheep.com/rclone/web/%E3%80%90%E5%8E%9F%E7%A5%9E%E3%80%91%E7%A5%9E%E9%87%8C%E7%BB%AB%E5%8D%8E%E3%80%8C%E7%99%BD%E9%B9%AD%E5%BD%92%E5%BA%AD%E3%80%8D.flac", true);
+        let source = audioCtx.createMediaElementSource(audio);
+
+        let options = {
+            'fftSize': 2048,
+            'maxDecibels': -30,
+            'minDecibels': -100,
+            'smoothingTimeConstant': 0.8
+        }
+        let analyser = new AnalyserNode(audioCtx, options)
+
+        console.log(audioCtx, analyser)
+
+        let binCount = analyser.frequencyBinCount;
+        let columnWidth = 16;
+        input_width.value = columnWidth
+        let columnNum = binCount / columnWidth;
+        let x = new Float32Array(columnNum * 2)
+        let y = new Uint8Array(columnNum * 2);
+        let yy = new Uint8Array(binCount);
+
+        let xx = 1 / columnNum;
         x[0] = -1
         for (let i = 1; i < columnNum; i++) {
             x[i * 2] = xx * 2 * i - 1
             x[i * 2 - 1] = xx * 2 * i - 1
         }
         x[columnNum * 2 - 1] = 1
-        setVertexAttribArray(gl, glProgram, x, gl.FLOAT, "x", 1, false)
 
-    }
+        console.log(x)
+        console.log(binCount)
 
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-    let gl = canvas.getContext("webgl2")
-
-    let audioCtx = new window.AudioContext();
-
-    let audio = createAudio("https://cd.oldshensheep.com/s/HGo8cFAfNLnY34N/download/%E3%80%90%E5%8E%9F%E7%A5%9E%E3%80%91%E7%A5%9E%E9%87%8C%E7%BB%AB%E5%8D%8E%E3%80%8C%E7%99%BD%E9%B9%AD%E5%BD%92%E5%BA%AD%E3%80%8D.flac", true);
-    let source = audioCtx.createMediaElementSource(audio);
-
-    let options = {
-        'fftSize': 2048,
-        'maxDecibels': -30,
-        'minDecibels': -100,
-        'smoothingTimeConstant': 0.8
-    }
-    let analyser = new AnalyserNode(audioCtx, options)
-
-    console.log(audioCtx, analyser)
-
-    let binCount = analyser.frequencyBinCount;
-    let columnWidth = 16;
-    input_width.value = columnWidth
-    let columnNum = binCount / columnWidth;
-    let x = new Float32Array(columnNum * 2)
-    let y = new Uint8Array(columnNum * 2);
-    let yy = new Uint8Array(binCount);
-
-    let xx = 1 / columnNum;
-    x[0] = -1
-    for (let i = 1; i < columnNum; i++) {
-        x[i * 2] = xx * 2 * i - 1
-        x[i * 2 - 1] = xx * 2 * i - 1
-    }
-    x[columnNum * 2 - 1] = 1
-
-    console.log(x)
-    console.log(binCount)
-
-    let vertexShaderSource = `#version 300 es
+        let vertexShaderSource = `#version 300 es
     in float x;
     in float y;
     out vec4 v_color;
@@ -96,7 +98,7 @@
     }
     `
 
-    let fragmentShaderSource = `#version 300 es
+        let fragmentShaderSource = `#version 300 es
      precision highp float;
 
      in vec4 v_color;
@@ -105,60 +107,61 @@
       OutColor = v_color;
      }
     `
-    file.onchange = function () {
-        let fr = new FileReader();
-        fr.readAsDataURL(document.getElementById("file").files[0]);
-        fr.onload = e => {
-            audioCtx.resume()
-            audio.src = e.target.result
-            audio.play();
-        };
-    }
-
-    let glProgram = initShader(gl, vertexShaderSource, fragmentShaderSource);
-
-    setVertexAttribArray(gl, glProgram, x, gl.FLOAT, "x", 1, false)
-
-
-    function play() {
-        // The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page.
-        audioCtx.resume()
-        source.connect(analyser);
-        analyser.connect(audioCtx.destination);
-        audio.play();
-
-    }
-
-    function createAudio(src, loop) {
-        let audio = new Audio(src);
-        audio.loop = loop || true;
-        audio.crossOrigin = "anonymous";
-        audio.load();
-        return audio;
-    }
-
-
-    function render() {
-        analyser.getByteFrequencyData(yy)
-        console.log(yy)
-        for (let i = 0; i < columnNum; i++) {
-            let sum = 0;
-            for (let j = 0; j < columnWidth; j++) {
-                sum += yy[i * columnWidth + j]
-            }
-            y[i * 2] = sum / columnWidth
-            y[i * 2 + 1] = sum / columnWidth
+        file.onchange = function () {
+            let fr = new FileReader();
+            fr.readAsDataURL(document.getElementById("file").files[0]);
+            fr.onload = e => {
+                audioCtx.resume()
+                audio.src = e.target.result
+                audio.play();
+            };
         }
-        console.log(y)
 
-        setVertexAttribArray(gl, glProgram, y, gl.UNSIGNED_BYTE, "y", 1, true, gl.DYNAMIC_DRAW)
-        gl.drawArrays(gl.LINE_STRIP, 0, columnNum * 2)
-        requestAnimationFrame(render)
-    }
+        let glProgram = initShader(gl, vertexShaderSource, fragmentShaderSource);
 
-    render()
+        setVertexAttribArray(gl, glProgram, x, gl.FLOAT, "x", 1, false)
 
 
-</script>
+        function play() {
+            // The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page.
+            audioCtx.resume()
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            audio.play();
+
+        }
+
+        function createAudio(src, loop) {
+            let audio = new Audio(src);
+            audio.loop = loop || true;
+            audio.crossOrigin = "anonymous";
+            audio.load();
+            return audio;
+        }
+
+
+        function render() {
+            analyser.getByteFrequencyData(yy)
+            console.log(yy)
+            for (let i = 0; i < columnNum; i++) {
+                let sum = 0;
+                for (let j = 0; j < columnWidth; j++) {
+                    sum += yy[i * columnWidth + j]
+                }
+                y[i * 2] = sum / columnWidth
+                y[i * 2 + 1] = sum / columnWidth
+            }
+            console.log(y)
+
+            setVertexAttribArray(gl, glProgram, y, gl.UNSIGNED_BYTE, "y", 1, true, gl.DYNAMIC_DRAW)
+            gl.drawArrays(gl.LINE_STRIP, 0, columnNum * 2)
+            requestAnimationFrame(render)
+        }
+
+        render()
+
+
+    </script>
 </body>
+
 </html>

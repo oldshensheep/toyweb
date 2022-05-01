@@ -1,41 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
+
 <body>
-<video id="video" crossorigin="anonymous" src="https://cd.oldshensheep.com/s/7nMLDXDQQMYM8TT/download/%E7%A5%9E%E5%A5%B3%E5%8A%88%E8%A7%82.mp4" controls width="320" height="240"></video>
-<canvas id="canvas" style="border: 1px solid"></canvas>
-<script src="../assets/lib/sgl.js"></script>
-<script>
-    let canvas = document.getElementById("canvas")
-    let video = document.getElementById("video")
-    console.log(video.videoHeight)
-    canvas.height = 1080/2
-    canvas.width = 1920/2
-    let gl = canvas.getContext("webgl2");
+    <video id="video" crossorigin="anonymous"
+        src="https://webdav.oldshensheep.com/rclone/web/%E7%A5%9E%E5%A5%B3%E5%8A%88%E8%A7%82.mp4" controls width="320"
+        height="240"></video>
+    <canvas id="canvas" style="border: 1px solid"></canvas>
+    <script src="../assets/lib/sgl.js"></script>
+    <script>
+        let canvas = document.getElementById("canvas")
+        let video = document.getElementById("video")
+        console.log(video.videoHeight)
+        canvas.height = 1080 / 2
+        canvas.width = 1920 / 2
+        let gl = canvas.getContext("webgl2");
 
-    let playing = false;
-    let timeupdate = false;
-    let copyVideo = false;
-    video.addEventListener('playing', function () {
-        playing = true;
-        checkReady();
-    }, true);
+        let playing = false;
+        let timeupdate = false;
+        let copyVideo = false;
+        video.addEventListener('playing', function () {
+            playing = true;
+            checkReady();
+        }, true);
 
-    video.addEventListener('timeupdate', function () {
-        timeupdate = true;
-        checkReady();
-    }, true);
+        video.addEventListener('timeupdate', function () {
+            timeupdate = true;
+            checkReady();
+        }, true);
 
-    function checkReady() {
-        if (playing && timeupdate) {
-            copyVideo = true;
+        function checkReady() {
+            if (playing && timeupdate) {
+                copyVideo = true;
+            }
         }
-    }
 
-    let vertexShaderSource = `#version 300 es
+        let vertexShaderSource = `#version 300 es
     in vec2 a_position;
     in vec2 a_texCoord;
     out vec2 v_texCoord;
@@ -46,7 +50,7 @@
     }
 
     `;
-    let fragmentShaderSource = `#version 300 es
+        let fragmentShaderSource = `#version 300 es
 
     precision highp float;
 
@@ -75,66 +79,67 @@
     }
     `;
 
-    kernel =[1, 2, 1, 0, 0, 0, -1, -2, -1]
+        kernel = [1, 2, 1, 0, 0, 0, -1, -2, -1]
 
-    let glProgram = initShader(
-        gl,
-        vertexShaderSource,
-        fragmentShaderSource
-    );
-    setVertexAttribArray(
-        gl,
-        glProgram,
-        new Float32Array([1, -1, -1, -1, 1, 1, -1, 1]),
-        gl.FLOAT,
-        "a_position",
-        2,
-        false
-    );
-    setVertexAttribArray(
-        gl,
-        glProgram,
-        new Float32Array([1, 0, 0, 0, 1, 1, 0, 1]),
-        gl.FLOAT,
-        "a_texCoord",
-        2,
-        false
-    );
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    let u_kernel = gl.getUniformLocation(glProgram, "u_kernel");
-    let u_kernelWeight = gl.getUniformLocation(
-        glProgram,
-        "u_kernelWeight"
-    );
+        let glProgram = initShader(
+            gl,
+            vertexShaderSource,
+            fragmentShaderSource
+        );
+        setVertexAttribArray(
+            gl,
+            glProgram,
+            new Float32Array([1, -1, -1, -1, 1, 1, -1, 1]),
+            gl.FLOAT,
+            "a_position",
+            2,
+            false
+        );
+        setVertexAttribArray(
+            gl,
+            glProgram,
+            new Float32Array([1, 0, 0, 0, 1, 1, 0, 1]),
+            gl.FLOAT,
+            "a_texCoord",
+            2,
+            false
+        );
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        let u_kernel = gl.getUniformLocation(glProgram, "u_kernel");
+        let u_kernelWeight = gl.getUniformLocation(
+            glProgram,
+            "u_kernelWeight"
+        );
 
-    function computeKernelWeight(kernel) {
-        let weight = kernel.reduce(function (prev, curr) {
-            return prev + curr;
-        });
-        return weight <= 0 ? 1 : weight;
-    }
-
-    gl.uniform1fv(u_kernel, kernel);
-    gl.uniform1f(u_kernelWeight, computeKernelWeight(kernel));
-    let texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture)
-    gl.activeTexture(gl.TEXTURE0);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    let u_image = gl.getUniformLocation(glProgram, "u_image");
-    gl.uniform1i(u_image, 0)
-
-    function render() {
-        if (copyVideo === true) {
-            gl.bindTexture(gl.TEXTURE_2D, texture)
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video)
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        function computeKernelWeight(kernel) {
+            let weight = kernel.reduce(function (prev, curr) {
+                return prev + curr;
+            });
+            return weight <= 0 ? 1 : weight;
         }
-        requestAnimationFrame(render);
-    }
 
-    requestAnimationFrame(render);
-</script>
+        gl.uniform1fv(u_kernel, kernel);
+        gl.uniform1f(u_kernelWeight, computeKernelWeight(kernel));
+        let texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture)
+        gl.activeTexture(gl.TEXTURE0);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        let u_image = gl.getUniformLocation(glProgram, "u_image");
+        gl.uniform1i(u_image, 0)
+
+        function render() {
+            if (copyVideo === true) {
+                gl.bindTexture(gl.TEXTURE_2D, texture)
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video)
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+            requestAnimationFrame(render);
+        }
+
+        requestAnimationFrame(render);
+    </script>
 </body>
+
 </html>
