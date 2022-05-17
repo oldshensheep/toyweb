@@ -2,80 +2,80 @@
 <html>
 
 <head>
-  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet"
+    type="text/css">
+  <link href="https://cdn.jsdelivr.net/npm/quasar@2.6.6/dist/quasar.prod.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
-  <div id="app">
-    <v-app class="" id="app">
-      <v-main>
-        <v-card>
-          <v-card-title>
-            <v-menu :close-on-content-click="false">
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn color="primary" v-bind="attrs" v-on="on">
-                  选择日期
-                </v-btn>
-              </template>
-              <v-date-picker v-model="currentDate" :allowed-dates="allowedDates"></v-date-picker>
-            </v-menu>
-            <div class="mx-4">{{currentDate}}</div>
-            <v-spacer></v-spacer>
-            <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details>
-            </v-text-field>
-          </v-card-title>
-          <v-data-table :headers="headers" :items="plsc" :search="search" :disable-pagination="true"
-            :hide-default-footer="true">
-            <template v-slot:item.id="{ item }">
-              <v-icon class="mr-2" @click="editItem(item)">
-                mdi-play-circle
-              </v-icon>
-              <v-icon @click="openSongPage(item.id)"> mdi-eye </v-icon>
-            </template>
-            <template v-slot:no-data>
-              <v-btn color="primary" @click="getFileList()"> Refresh </v-btn>
-            </template>
-          </v-data-table>
-        </v-card>
-      </v-main>
-    </v-app>
-  </div>
+  <div id="q-app">
 
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
+    <q-table :flat="true" :rows="currentPlaylist" :columns="headers" row-key="id" :filter="filter" :loading="loading"
+      :hide-pagination="true" :rows-per-page-options="[0]" :wrap-cells="true">
+      <template v-slot:top>
+        <q-btn color="primary" label="选择日期">
+          <q-menu>
+            <q-date v-model="currentDate" :options="validDate" mask="YYYY-MM-DD" today-btn />
+          </q-menu>
+        </q-btn>
+        <div class="q-mx-lg">
+          {{currentDate}}
+        </div>
+        <q-space></q-space>
+        <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </template>
+      <template v-slot:body-cell-id="props">
+        <q-td :props="props">
+          <div>
+            <a style="text-decoration: none;" target="_blank" :href="'https://music.163.com/song?id=' + props.value">
+              <q-btn flat icon="open_in_new" size="sm"></q-btn>
+            </a>
+          </div>
+        </q-td>
+      </template>
+    </q-table>
+
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quasar@2.6.6/dist/quasar.umd.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quasar@2.6.6/dist/lang/zh-CN.umd.prod.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fflate/umd/index.js"></script>
   <script>
+    'use strict';
+    const { useQuasar, date } = Quasar;
+    const { ref, watch, watchEffect, computed, onMounted } = Vue;
+
     function sec2text00_00(currentTime) {
       let m = Math.floor(currentTime / 60);
       let s = Math.round(currentTime % 60);
       return `${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
     }
-    SHARE_URL = "https://webdav.oldshensheep.com/rclone/ncmdaily";
-    new Vue({
-      el: "#app",
-      vuetify: new Vuetify(),
-      data: {
-        search: "",
-        headers: [
-          { text: "歌曲标题", value: "name" },
-          { text: "时长", value: "dt" },
-          { text: "歌手", value: "ar" },
-          { text: "专辑", value: "al" },
-          { text: "reason", value: "reason" },
-          { text: "Actions", value: "id", sortable: false, width: "10%" },
-        ],
-        dates: [],
-        pls: [],
-        currentDate: "",
-      },
-      computed: {
-        plsc() {
-          let spls = [];
-          this.pls.forEach((e) => {
-            spls.push({
+    const SHARE_URL = "https://webdav.oldshensheep.com/rclone/ncmdaily";
+
+    const app = Vue.createApp({
+      setup() {
+
+        const filter = ref("")
+        const loading = ref(false)
+        const headers = ref([
+          { name: "name", field: "name", label: "歌曲标题", sortable: true, align: 'left' },
+          { name: "dt", field: "dt", label: "时长", sortable: true, align: 'left' },
+          { name: "ar", field: "ar", label: "歌手", sortable: true, align: 'left' },
+          { name: "al", field: "al", label: "专辑", sortable: true, align: 'left' },
+          { name: "reason", field: "reason", label: "推荐原因", sortable: true, align: 'left' },
+          { name: "id", field: "id", label: "操作", sortable: false, align: 'left' },
+        ])
+        const dates = ref([])
+        const playlist = ref([])
+        const currentDate = ref(date.formatDate(new Date(), "YYYY-MM-DD"))
+        const currentPlaylist = computed(() => {
+          let b = [];
+          playlist.value.forEach((e) => {
+            b.push({
               name: e["name"],
               dt: sec2text00_00(e["dt"] / 1000),
               ar: e["ar"].map((x) => x["name"]).join("/"),
@@ -84,52 +84,66 @@
               id: e["id"],
             });
           });
-          return spls;
-        },
-      },
-      watch: {
-        currentDate(n, o) {
-          console.log(n, o);
-          date = n.split("-");
-          year = date[0];
-          month = date[1];
-          this.getpls(
-            `${SHARE_URL}/${year}/${month}/${n}.json.gz`
-          );
-        },
-      },
-      mounted() {
-        this.getFileList();
-      },
-      methods: {
-        openSongPage(id) {
-          window.open("https://music.163.com/song?id=" + id);
-        },
-        getFileList() {
+          return b;
+        })
+
+        function validDate(date) {
+          return dates.value.includes(date.split('/').join('-'))
+        }
+
+        function getAvailableDate() {
           fetch(`${SHARE_URL}/validate.json`)
             .then(response => response.json())
             .then((r) => {
-              this.dates = r
-              console.log(this.dates);
-              this.currentDate = this.dates[this.dates.length - 1];
+              dates.value = r
+              console.log(dates.value);
+              currentDate.value = dates.value[dates.value.length - 1];
             });
-        },
-        getpls(url) {
+        }
+
+        function getPlaylist(url) {
+          loading.value = true
           fetch(url)
             .then(response => response.arrayBuffer())
             .then((r) => {
-              this.pls = JSON.parse(
+              playlist.value = JSON.parse(
                 fflate.strFromU8(
                   fflate.decompressSync(new Uint8Array(r))
                 )
               )["data"]["dailySongs"];
+              console.log(playlist.value);
+              loading.value = false
             });
-        },
-        allowedDates(val) {
-          return this.dates.includes(val);
-        },
-      },
-    });
+        }
+
+        watchEffect(() => {
+          console.log(currentDate.value);
+          let date = currentDate.value.split("-");
+          let year = date[0];
+          let month = date[1];
+          getPlaylist(
+            `${SHARE_URL}/${year}/${month}/${currentDate.value}.json.gz`
+          );
+        })
+        onMounted(() => {
+          console.log("dd");
+          getAvailableDate();
+        }
+        )
+        return {
+          loading,
+          currentDate,
+          filter,
+          dates,
+          currentPlaylist,
+          headers,
+          validDate,
+        }
+      }
+    })
+    app.use(Quasar)
+    app.mount('#q-app')
+    Quasar.lang.set(Quasar.lang.zhCN)
   </script>
 </body>
 
