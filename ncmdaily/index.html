@@ -3,9 +3,8 @@
 
 <head>
   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/iconfont/material-icons.min.css"
-    rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.6.4/vuetify.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
 </head>
 
@@ -45,8 +44,8 @@
     </v-app>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.6.4/vuetify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fflate/umd/index.js"></script>
   <script>
     function sec2text00_00(currentTime) {
@@ -107,10 +106,10 @@
           window.open("https://music.163.com/song?id=" + id);
         },
         getFileList() {
-          fetch(`${SHARE_URL}/validate.txt`)
-            .then(response => response.text())
+          fetch(`${SHARE_URL}/validate.json`)
+            .then(response => response.json())
             .then((r) => {
-              this.dates = r.split(/\n|\r\n/).filter((e) => e.length > 0);
+              this.dates = r
               console.log(this.dates);
               this.currentDate = this.dates[this.dates.length - 1];
             });
