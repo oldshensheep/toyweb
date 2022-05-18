@@ -15,7 +15,7 @@
       <template v-slot:top>
         <q-btn color="primary" label="选择日期">
           <q-menu>
-            <q-date v-model="currentDate" :options="validDate" mask="YYYY-MM-DD" today-btn />
+            <q-date v-model="currentDate" :options="validDate" mask="YYYY-MM-DD" today-btn></q-date>
           </q-menu>
         </q-btn>
         <div class="q-mx-lg">
@@ -24,7 +24,7 @@
         <q-space></q-space>
         <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
           <template v-slot:append>
-            <q-icon name="search" />
+            <q-icon name="search"></q-icon>
           </template>
         </q-input>
       </template>
@@ -71,7 +71,7 @@
         ])
         const dates = ref([])
         const playlist = ref([])
-        const currentDate = ref(date.formatDate(new Date(), "YYYY-MM-DD"))
+        const currentDate = ref(null)
         const currentPlaylist = computed(() => {
           let b = [];
           playlist.value.forEach((e) => {
@@ -116,7 +116,7 @@
             });
         }
 
-        watchEffect(() => {
+        watch(currentDate, () => {
           console.log(currentDate.value);
           let date = currentDate.value.split("-");
           let year = date[0];
