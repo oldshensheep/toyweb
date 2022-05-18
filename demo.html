@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        message:{{ message }}
+        <button @click="changeMessage">changeMessage</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vueuse/core@8.5.0/index.iife.min.js"></script>
+    <script>
+        Vue.createApp({
+            data: () => ({
+                message: VueUse.useStorage('message', 'Hello Vue!'),
+            }),
+            mounted() {
+                console.log(this.message);
+            },
+            methods: {
+                changeMessage() {
+                    this.message = 'Hello VVV!';
+                    console.log(this.message);
+                },
+            },
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
