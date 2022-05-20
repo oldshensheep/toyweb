@@ -1,42 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css"
-      rel="stylesheet"
-    />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sheep's Toy</title>
-  </head>
-  <body>
-    <v-app id="app">
-      <v-btn class="text-none" href="lastfm-export/">Last.FM Export</v-btn>
-      <v-btn class="text-none" inline-block href="playlist-compare/"
-        >Playlist Compare</v-btn
-      >
-      <v-btn class="text-none" href="ncmdaily/"
-        >Netease Cloud Music daily recommendation</v-btn
-      >
-      <v-btn class="text-none" href="dip/">Digital image processing</v-btn>
-      <v-btn class="text-none" href="webgl/">WebGL</v-btn>
-      <v-btn class="text-none" href="jo/a.html">What?</v-btn>
-    </v-app>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
-    <script>
-      new Vue({
-        el: "#app",
-        vuetify: new Vuetify(),
-      });
-    </script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sheep's Toy</title>
+  <link rel="stylesheet" href="./reset.css" />
+  <style sty></style>
+  <style>
+    button {
+      background-color: #13aac4;
+      border: none;
+      width: 100%;
+      color: white;
+      padding: 10px 32px;
+      text-align: center;
+      display: block;
+      font-size: 16px;
+      margin: 2px 2px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0dcaeb;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="lastfm-export/">
+    <button>Last.FM Export</button>
+  </a>
+  <a href="playlist-compare/">
+    <button>Playlist Compare</button>
+  </a>
+  <a href="ncmdaily/">
+    <button>Netease Cloud Music daily recommendation</button>
+  </a>
+  <a href="dip/">
+    <button>Digital image processing</button>
+  </a>
+  <a href="webgl/">
+    <button>WebGL</button>
+  </a>
+  <a href="jo/a.html">
+    <button>What?</button>
+  </a>
+</body>
+
 </html>

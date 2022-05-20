@@ -13,6 +13,9 @@
     a {
       text-decoration: none;
     }
+    a:visited {
+      color: inherit;
+    }
   </style>
 </head>
 
@@ -21,26 +24,32 @@
     <q-layout view="hHh lpR fFf">
       <q-header elevated class="bg-primary text-white">
         <q-toolbar>
-          <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
+          <q-btn dense flat round icon="menu" @click="toggleLeftDrawer"></q-btn>
           <q-toolbar-title> 歌单匹配 </q-toolbar-title>
         </q-toolbar>
       </q-header>
 
       <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered>
         <q-list padding>
-          <q-item clickable v-ripple @click='open_external_link("https://music.163.com/#/user/home?id=319475460")'>
-            <q-item-section avatar>
-              <q-icon name="launch" />
-            </q-item-section>
-            <q-item-section> 我的网易云音乐主页 </q-item-section>
-          </q-item>
 
-          <q-item active clickable v-ripple @click='open_external_link("https://github.com/oldshensheep/toyweb")'>
-            <q-item-section avatar>
-              <q-icon name="launch" />
-            </q-item-section>
-            <q-item-section> Github </q-item-section>
-          </q-item>
+          <a target="_blank" href="https://music.163.com/#/user/home?id=319475460">
+            <q-item clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon name="launch"></q-icon>
+              </q-item-section>
+              <q-item-section> 我的网易云音乐主页 </q-item-section>
+            </q-item>
+          </a>
+
+          <a target="_blank" href="https://github.com/oldshensheep/toyweb">
+            <q-item clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon name="launch"></q-icon>
+              </q-item-section>
+              <q-item-section> Github </q-item-section>
+            </q-item>
+          </a>
+
           <div class="text-center q-mt-lg">我的歌单id：444265995</div>
           <div class="text-center q-mt-lg">
             你可以点击结果中的用户名进入网易云音乐主页
@@ -121,7 +130,7 @@
             <template v-slot:top-right>
               <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
                 <template v-slot:append>
-                  <q-icon name="search" />
+                  <q-icon name="search"></q-icon>
                 </template>
               </q-input>
             </template>
