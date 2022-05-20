@@ -1,19 +1,3 @@
-if (localStorage.getItem("her_input") === null) {
-  localStorage.setItem("her_input", DEFAULT.her_input);
-}
-
-if (localStorage.getItem("your_input") === null) {
-  localStorage.setItem("your_input", DEFAULT.your_input);
-}
-if (localStorage.getItem("accept") === null) {
-  localStorage.setItem("accept", "false");
-}
-if (localStorage.getItem("her_platform") === null) {
-  localStorage.setItem("her_platform", DEFAULT.her_platform);
-}
-if (localStorage.getItem("your_platform") === null) {
-  localStorage.setItem("your_platform", DEFAULT.your_platform);
-}
 
 const id_reg = new RegExp("((?<=/playlist/)[0-9]*)|((?<=/?id=)[0-9]*)");
 const columns = [
@@ -40,21 +24,22 @@ const columns = [
 ];
 const { useQuasar } = Quasar;
 const { ref, watch, computed } = Vue;
+const { useStorage } = VueUse;
 
 const app = Vue.createApp({
   setup() {
     const $q = useQuasar();
     const leftDrawerOpen = ref(false);
-    const her_input = ref(localStorage.getItem("her_input"));
-    const your_input = ref(localStorage.getItem("your_input"));
-    const her_platform = ref(localStorage.getItem("her_platform"));
-    const your_platform = ref(localStorage.getItem("your_platform"));
+    const her_input = useStorage("her_input", DEFAULT.her_input);
+    const your_input = useStorage("your_input", DEFAULT.your_input);
+    const her_platform = useStorage("her_platform", DEFAULT.her_platform);
+    const your_platform = useStorage("your_platform", DEFAULT.your_platform)
+    const accept = useStorage("accept", false)
     const your = ref({ name: "昵称", id: "319475460" });
     const her = ref({ name: "昵称", id: "319475460" });
     const her_playlist = ref({ name: "歌单名称", len: 0 });
     const your_playlist = ref({ name: "歌单名称", len: 0 });
     const same = ref([]);
-    const accept = ref(localStorage.getItem("accept") === "true");
     const message = "Hello Vue!";
 
     const idRules = [
@@ -109,21 +94,6 @@ const app = Vue.createApp({
         your_platform.value = "qqm"
       }
     })
-    watch(accept, (accept) => {
-      localStorage.setItem("accept", accept);
-    });
-    watch(her_input, (her_input) => {
-      localStorage.setItem("her_input", her_input || "");
-    });
-    watch(your_input, (your_input) => {
-      localStorage.setItem("your_input", your_input || "");
-    });
-    watch(her_platform, (her_platform) => {
-      localStorage.setItem("her_platform", her_platform || "ncm");
-    });
-    watch(your_platform, (your_platform) => {
-      localStorage.setItem("your_platform", your_platform || "ncm");
-    });
     return {
       filter: ref(""),
       her_input,

@@ -75,7 +75,7 @@
           </q-form>
           <div class="q-mt-lg">
             <div class="text-h6">
-              你和ta有 <q-badge  class="text-h6" color="green"> {{same.length}} </q-badge>
+              你和ta有 <q-badge class="text-h6" color="green"> {{same.length}} </q-badge>
               首相同的歌曲
             </div>
             <q-badge color="pink"> {{msg}} </q-badge>
@@ -131,8 +131,10 @@
     </q-layout>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/quasar@2.5.5/dist/quasar.umd.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quasar@2.5.5/dist/quasar.umd.prod.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vueuse/shared@8.5.0/index.iife.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vueuse/core@8.5.0/index.iife.min.js" crossorigin="anonymous"></script>
   <script src="./api.js"></script>
   <script src="./app.js"></script>
 </body>
