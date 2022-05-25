@@ -37,8 +37,31 @@
 
   <script src="https://fastly.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
   <script src="https://fastly.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
+    'use strict';
+    function export2csv() {
+      let elementA = document.createElement("a");
+      elementA.download = `${this.username}.lastfm.csv`;
+      elementA.style.display = "none";
+      let csvString = "songName|artist|album|date|loved\n";
+      this.trackList.forEach((e) => {
+        csvString += `${this.CSVStringConverter(
+          e["name"]
+        )}|${this.CSVStringConverter(
+          e["artist"]
+        )}|${this.CSVStringConverter(e["album"])}|${new Date(
+          e["date"]
+        ).valueOf()}|${e["loved"]}\n`;
+      });
+      let blob = new Blob([csvString], {
+        type: "text/csv",
+      });
+      elementA.href = URL.createObjectURL(blob);
+      document.body.appendChild(elementA);
+      elementA.click();
+      document.body.removeChild(elementA);
+    }
+
     new Vue({
       el: "#app",
       vuetify: new Vuetify(),
@@ -65,28 +88,7 @@
           }
           return s;
         },
-        export2csv() {
-          let elementA = document.createElement("a");
-          elementA.download = this.username + ".csv";
-          elementA.style.display = "none";
-          let csvString = "songName|artist|album|date|loved\n";
-          this.trackList.forEach((e) => {
-            csvString += `${this.CSVStringConverter(
-              e["name"]
-            )}|${this.CSVStringConverter(
-              e["artist"]
-            )}|${this.CSVStringConverter(e["album"])}|${new Date(
-              e["date"]
-            ).valueOf()}|${e["loved"]}\n`;
-          });
-          let blob = new Blob([csvString], {
-            type: "text/csv",
-          });
-          elementA.href = URL.createObjectURL(blob);
-          document.body.appendChild(elementA);
-          elementA.click();
-          document.body.removeChild(elementA);
-        },
+
         async get() {
           this.totalPages = 1;
           this.finishedPages = 0;
@@ -102,23 +104,21 @@
           });
         },
         async getRecentTracks(user, api_key, page) {
-          let response = await axios.get(
-            "https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks",
-            {
-              params: {
-                format: "json",
-                limit: "200",
-                extended: 1,
-                api_key: api_key,
-                user: user,
-                page: page,
-              },
-            }
-          );
-          this.finishedPages++;
-          return response.data;
+          let response = await fetch(
+            "https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&" +
+            new URLSearchParams({
+              format: "json",
+              limit: "200",
+              extended: 1,
+              api_key: api_key,
+              user: user,
+              page: page,
+            })
+          )
+          return await response.json();
         },
-        responsetify(response) {
+        push_to_result(response) {
+          this.finishedPages++;
           response["recenttracks"]["track"].forEach((element) => {
             this.trackList.push({
               name: element["name"],
@@ -131,13 +131,11 @@
         },
         async getall(user, api_key) {
           let response = await this.getRecentTracks(user, api_key, 1);
-          this.responsetify(response);
-          this.totalPages = Number(
-            response["recenttracks"]["@attr"]["totalPages"]
-          );
+          this.totalPages = Number(response["recenttracks"]["@attr"]["totalPages"]);
+          this.push_to_result(response);
           for (let index = 2; index <= this.totalPages; index++) {
             let response = await this.getRecentTracks(user, api_key, index);
-            this.responsetify(response);
+            this.push_to_result(response);
           }
         },
       },
