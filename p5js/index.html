@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+      * {
+          margin: 0;
+          padding: 0;
+      }
+  </style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.4.1/lib/p5.js"></script>
+<script>
+
+  function setup() {
+    createCanvas(innerWidth, innerHeight);
+  }
+
+  function draw() {
+    if (mouseIsPressed) {
+      fill(0);
+    } else {
+      fill(255);
+    }
+    ellipse(mouseX, mouseY, 80, 80);
+  }
+</script>
+</body>
+</html>

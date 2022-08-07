@@ -126,8 +126,9 @@
           );
         })
         onMounted(() => {
-          console.log("dd");
+          loading.value = true;
           getAvailableDate();
+          loading.value = false;
         }
         )
         return {
