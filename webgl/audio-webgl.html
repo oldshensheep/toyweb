@@ -1,59 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<style>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio WebGL V1</title>
+  </head>
+  <style>
     #canvas {
-        position: fixed;
-        left: 0;
-        top: 0;
-        z-index: -1;
-        /*border: 1px solid;*/
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: -1;
+      /*border: 1px solid;*/
     }
-</style>
+  </style>
 
-<body>
+  <body>
     <canvas id="canvas"></canvas>
-    <input type="file" id="file" accept="audio/*">
+    <input type="file" id="file" accept="audio/*" />
     <button onclick="play()">Play</button>
     <script src="../assets/lib/sgl.js"></script>
     <script>
-        let file = document.getElementById("file");
-        let canvas = document.getElementById("canvas")
+      let file = document.getElementById("file");
+      let canvas = document.getElementById("canvas");
 
-        canvas.width = window.innerWidth
-        canvas.height = window.innerHeight
-        let gl = canvas.getContext("webgl2")
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      let gl = canvas.getContext("webgl2");
 
-        let audioCtx = new window.AudioContext();
+      let audioCtx = new window.AudioContext();
 
-        let audio = createAudio("https://webdav.oldshensheep.com/rclone/web/%E3%80%90%E5%8E%9F%E7%A5%9E%E3%80%91%E7%A5%9E%E9%87%8C%E7%BB%AB%E5%8D%8E%E3%80%8C%E7%99%BD%E9%B9%AD%E5%BD%92%E5%BA%AD%E3%80%8D.flac", true);
-        let source = audioCtx.createMediaElementSource(audio);
+      let audio = createAudio(
+        "https://webdav.oldshensheep.com/rclone/web/%E3%80%90%E5%8E%9F%E7%A5%9E%E3%80%91%E7%A5%9E%E9%87%8C%E7%BB%AB%E5%8D%8E%E3%80%8C%E7%99%BD%E9%B9%AD%E5%BD%92%E5%BA%AD%E3%80%8D.flac",
+        true
+      );
+      let source = audioCtx.createMediaElementSource(audio);
 
-        let options = {
-            'fftSize': 2048,
-            'maxDecibels': -30,
-            'minDecibels': -100,
-            'smoothingTimeConstant': 0.8
-        }
-        let analyser = new AnalyserNode(audioCtx, options)
+      let options = {
+        fftSize: 2048,
+        maxDecibels: -30,
+        minDecibels: -100,
+        smoothingTimeConstant: 0.8,
+      };
+      let analyser = new AnalyserNode(audioCtx, options);
 
-        console.log(audioCtx, analyser)
+      console.log(audioCtx, analyser);
 
-        let binCount = analyser.frequencyBinCount;
-        let x = new Float32Array(binCount)
-        let y = new Uint8Array(binCount);
-        for (let i = 0; i < 2 * binCount; i += 2) {
-            x[i / 2] = i / binCount - 1;
-        }
+      let binCount = analyser.frequencyBinCount;
+      let x = new Float32Array(binCount);
+      let y = new Uint8Array(binCount);
+      for (let i = 0; i < 2 * binCount; i += 2) {
+        x[i / 2] = i / binCount - 1;
+      }
 
-        console.log(x)
-        console.log(binCount)
+      console.log(x);
+      console.log(binCount);
 
-        let vertexShaderSource = `#version 300 es
+      let vertexShaderSource = `#version 300 es
     in float x;
     in float y;
     out vec4 v_color;
@@ -69,9 +73,9 @@
       gl_Position = vec4(x, y*2.0-1.0, 0, 1);
       v_color =  vec4(hsv2rgb(vec3(x * 0.5 + 0.5, y* 0.5 + 0.5, 1)), 1);
     }
-    `
+    `;
 
-        let fragmentShaderSource = `#version 300 es
+      let fragmentShaderSource = `#version 300 es
      precision highp float;
 
      in vec4 v_color;
@@ -79,53 +83,56 @@
      void main(){
       OutColor = v_color;
      }
-    `
-        file.onchange = function () {
-            let fr = new FileReader();
-            fr.readAsDataURL(document.getElementById("file").files[0]);
-            fr.onload = e => {
-                audioCtx.resume()
-                audio.src = e.target.result
-                audio.play();
-            };
-        }
+    `;
+      file.onchange = function () {
+        let fr = new FileReader();
+        fr.readAsDataURL(document.getElementById("file").files[0]);
+        fr.onload = (e) => {
+          audioCtx.resume();
+          audio.src = e.target.result;
+          audio.play();
+        };
+      };
 
-        let glProgram = initShader(gl, vertexShaderSource, fragmentShaderSource);
+      let glProgram = initShader(gl, vertexShaderSource, fragmentShaderSource);
 
-        setVertexAttribArray(gl, glProgram, x, gl.FLOAT, "x", 1, false)
+      setVertexAttribArray(gl, glProgram, x, gl.FLOAT, "x", 1, false);
 
+      function play() {
+        // The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page.
+        audioCtx.resume();
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        audio.play();
+      }
 
-        function play() {
-            // The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page.
-            audioCtx.resume()
-            source.connect(analyser);
-            analyser.connect(audioCtx.destination);
-            audio.play();
+      function createAudio(src, loop) {
+        let audio = new Audio(src);
+        audio.loop = loop || true;
+        audio.crossOrigin = "anonymous";
+        audio.load();
+        return audio;
+      }
 
-        }
+      function render() {
+        analyser.getByteFrequencyData(y);
+        console.log(y);
 
-        function createAudio(src, loop) {
-            let audio = new Audio(src);
-            audio.loop = loop || true;
-            audio.crossOrigin = "anonymous";
-            audio.load();
-            return audio;
-        }
+        setVertexAttribArray(
+          gl,
+          glProgram,
+          y,
+          gl.UNSIGNED_BYTE,
+          "y",
+          1,
+          true,
+          gl.DYNAMIC_DRAW
+        );
+        gl.drawArrays(gl.LINE_STRIP, 0, binCount);
+        requestAnimationFrame(render);
+      }
 
-
-        function render() {
-            analyser.getByteFrequencyData(y)
-            console.log(y)
-
-            setVertexAttribArray(gl, glProgram, y, gl.UNSIGNED_BYTE, "y", 1, true, gl.DYNAMIC_DRAW)
-            gl.drawArrays(gl.LINE_STRIP, 0, binCount)
-            requestAnimationFrame(render)
-        }
-
-        render()
-
-
+      render();
     </script>
-</body>
-
+  </body>
 </html>

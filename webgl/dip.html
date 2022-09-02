@@ -1,22 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
-<img id="image" src="../assets/img/img.jpg" alt="original image for processing">
-<canvas id="canvas" width="300" height="300" style="border: 1px solid"></canvas>
-<script src="../assets/lib/sgl.js"></script>
-<script>
-    "use strict";
-    let image = document.getElementById("image");
-    let canvas = document.getElementById("canvas");
-    let gl = canvas.getContext("webgl2");
-    image.onload = function () {
-        render()
-    }
-    let vertexShaderSource = `#version 300 es
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Title</title>
+  </head>
+  <body>
+    <img
+      id="image"
+      src="../assets/img/img.jpg"
+      alt="original image for processing"
+    />
+    <canvas
+      id="canvas"
+      width="300"
+      height="300"
+      style="border: 1px solid"
+    ></canvas>
+    <script src="../assets/lib/sgl.js"></script>
+    <script>
+      "use strict";
+      let image = document.getElementById("image");
+      let canvas = document.getElementById("canvas");
+      let gl = canvas.getContext("webgl2");
+      image.onload = function () {
+        render();
+      };
+      let vertexShaderSource = `#version 300 es
     in vec2 a_position;
     in vec2 a_texCoord;
     out vec2 v_texCoord;
@@ -26,8 +37,8 @@
         v_texCoord = a_texCoord;
     }
 
-    `
-    let fragmentShaderSource = `#version 300 es
+    `;
+      let fragmentShaderSource = `#version 300 es
     precision highp float;
     in vec2 v_texCoord;
     uniform sampler2D u_image;
@@ -35,26 +46,36 @@
     void main(){
       outColor = texture(u_image, v_texCoord);
     }
-    `
+    `;
 
-    function render() {
-        let glProgram = initShader(gl, vertexShaderSource, fragmentShaderSource);
-        setVertexAttribArray(gl, glProgram, new Float32Array([
-            1, 0,
-            0, 0,
-            1, 1,
-            0, 1
-        ]), gl.FLOAT, "a_position", 2, false)
-        setVertexAttribArray(gl, glProgram, new Float32Array([
-            1, 0,
-            0, 0,
-            1, 1,
-            0, 1
-        ]), gl.FLOAT, "a_texCoord", 2, false)
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
-        setSampler2D(gl, glProgram, image, "u_image")
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-    }
-</script>
-</body>
+      function render() {
+        let glProgram = initShader(
+          gl,
+          vertexShaderSource,
+          fragmentShaderSource
+        );
+        setVertexAttribArray(
+          gl,
+          glProgram,
+          new Float32Array([1, 0, 0, 0, 1, 1, 0, 1]),
+          gl.FLOAT,
+          "a_position",
+          2,
+          false
+        );
+        setVertexAttribArray(
+          gl,
+          glProgram,
+          new Float32Array([1, 0, 0, 0, 1, 1, 0, 1]),
+          gl.FLOAT,
+          "a_texCoord",
+          2,
+          false
+        );
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        setSampler2D(gl, glProgram, image, "u_image");
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+    </script>
+  </body>
 </html>
