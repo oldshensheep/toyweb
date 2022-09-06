@@ -90,15 +90,11 @@
         function validDate(date) {
           return dates.value.includes(date.split('/').join('-'))
         }
-
-        function getAvailableDate() {
-          fetch(`${SHARE_URL}/validate.json`)
-            .then(response => response.json())
-            .then((r) => {
-              dates.value = r
-              console.log(dates.value);
-              currentDate.value = dates.value[dates.value.length - 1];
-            });
+        async function getAvailableDate() {
+          const r = await (await fetch(`${SHARE_URL}/validate.json`)).json()
+          dates.value = r
+          console.log(dates.value);
+          currentDate.value = dates.value[dates.value.length - 1];
         }
 
         function getPlaylist(url) {
@@ -125,9 +121,9 @@
             `${SHARE_URL}/${year}/${month}/${currentDate.value}.json.gz`
           );
         })
-        onMounted(() => {
+        onMounted(async () => {
           loading.value = true;
-          getAvailableDate();
+          await getAvailableDate();
           loading.value = false;
         }
         )
