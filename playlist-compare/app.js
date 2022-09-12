@@ -172,7 +172,7 @@ const app = Vue.createApp({
               color: "red-5",
               textColor: "white",
               icon: "warning",
-              message: e,
+              message: "网络错误",
             });
             return;
           }
