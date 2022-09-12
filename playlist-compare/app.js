@@ -1,4 +1,3 @@
-
 const id_reg = new RegExp("((?<=/playlist/)[0-9]*)|((?<=/?id=)[0-9]*)");
 const columns = [
   {
@@ -33,8 +32,8 @@ const app = Vue.createApp({
     const her_input = useStorage("her_input", DEFAULT.her_input);
     const your_input = useStorage("your_input", DEFAULT.your_input);
     const her_platform = useStorage("her_platform", DEFAULT.her_platform);
-    const your_platform = useStorage("your_platform", DEFAULT.your_platform)
-    const accept = useStorage("accept", false)
+    const your_platform = useStorage("your_platform", DEFAULT.your_platform);
+    const accept = useStorage("accept", false);
     const your = ref({ name: "昵称", id: "319475460" });
     const her = ref({ name: "昵称", id: "319475460" });
     const her_playlist = ref({ name: "歌单名称", len: 0 });
@@ -81,19 +80,19 @@ const app = Vue.createApp({
     watch(her_input, (her_input) => {
       if (!her_input) return;
       if (her_input.match(/.*163\.com.*/)) {
-        her_platform.value = "ncm"
+        her_platform.value = "ncm";
       } else if (her_input.match(/.*qq\.com.*/)) {
-        her_platform.value = "qqm"
+        her_platform.value = "qqm";
       }
-    })
+    });
     watch(your_input, (your_input) => {
       if (!your_input) return;
       if (your_input.match(/.*163\.com.*/)) {
-        your_platform.value = "ncm"
+        your_platform.value = "ncm";
       } else if (your_input.match(/.*qq\.com.*/)) {
-        your_platform.value = "qqm"
+        your_platform.value = "qqm";
       }
-    })
+    });
     return {
       filter: ref(""),
       her_input,
@@ -150,23 +149,38 @@ const app = Vue.createApp({
 
           // her_playlist.value = await getPlaylist(her_id, her_platform.value);
           // your_playlist.value = await getPlaylist(your_id, your_platform.value);
-          let response = null
+          let data = null;
           try {
-            response = await getSame_test(your_id, her_id, your_platform.value, her_platform.value);
+            const resp = await getSame_test(
+              your_id,
+              her_id,
+              your_platform.value,
+              her_platform.value
+            );
+            if (!resp.ok) {
+              $q.notify({
+                color: "red-5",
+                textColor: "white",
+                icon: "warning",
+                message: resp.statusText,
+              });
+              return;
+            }
+            data = await resp.json();
           } catch (e) {
             $q.notify({
               color: "red-5",
               textColor: "white",
               icon: "warning",
-              message: "查询失败",
+              message: e,
             });
             return;
           }
-          same.value = response.common_songs;
-          her_playlist.value = response.her_playlist;
-          your_playlist.value = response.your_playlist;
-          your.value = response.your;
-          her.value = response.her;
+          same.value = data.common_songs;
+          her_playlist.value = data.her_playlist;
+          your_playlist.value = data.your_playlist;
+          your.value = data.your;
+          her.value = data.her;
           console.log(same.value);
           $q.notify({
             color: "green-4",
