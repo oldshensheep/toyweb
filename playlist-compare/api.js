@@ -2,7 +2,7 @@ const APIurl = {
   ncm: "https://ncmapi.v2nd.com",
   qqm: "https://service-c41ch70i-1257843962.gz.apigw.tencentcs.com/release/json_proxy/https://c.y.qq.com/v8/fcg-bin/fcg_v8_playlist_cp.fcg?id=",
 };
-const SHEEP_API = "https://api.oldshensheep.com";
+const SHEEP_API = "https://playlist-compare-backend.vercel.app/api";
 const DEFAULT = {
   her_input:
     "https://i.y.qq.com/n2/m/share/details/taoge.html?platform=11&appshare=android_qq&appversion=11050108&hosteuin=oKosNe6kNKoAoc**&id=8399616661&ADTAG=qfshare",
