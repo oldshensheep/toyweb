@@ -39,28 +39,6 @@
   <script src="https://fastly.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js"></script>
   <script>
     'use strict';
-    function export2csv() {
-      let elementA = document.createElement("a");
-      elementA.download = `${this.username}.lastfm.csv`;
-      elementA.style.display = "none";
-      let csvString = "songName|artist|album|date|loved\n";
-      this.trackList.forEach((e) => {
-        csvString += `${this.CSVStringConverter(
-          e["name"]
-        )}|${this.CSVStringConverter(
-          e["artist"]
-        )}|${this.CSVStringConverter(e["album"])}|${new Date(
-          e["date"]
-        ).valueOf()}|${e["loved"]}\n`;
-      });
-      let blob = new Blob([csvString], {
-        type: "text/csv",
-      });
-      elementA.href = URL.createObjectURL(blob);
-      document.body.appendChild(elementA);
-      elementA.click();
-      document.body.removeChild(elementA);
-    }
 
     new Vue({
       el: "#app",
@@ -88,7 +66,6 @@
           }
           return s;
         },
-
         async get() {
           this.totalPages = 1;
           this.finishedPages = 0;
@@ -138,6 +115,28 @@
             this.push_to_result(response);
           }
         },
+        export2csv() {
+          let elementA = document.createElement("a");
+          elementA.download = `${this.username}.lastfm.csv`;
+          elementA.style.display = "none";
+          let csvString = "songName|artist|album|date|loved\n";
+          this.trackList.forEach((e) => {
+            csvString += `${this.CSVStringConverter(
+              e["name"]
+            )}|${this.CSVStringConverter(
+              e["artist"]
+            )}|${this.CSVStringConverter(e["album"])}|${new Date(
+              e["date"]
+            ).valueOf()}|${e["loved"]}\n`;
+          });
+          let blob = new Blob([csvString], {
+            type: "text/csv",
+          });
+          elementA.href = URL.createObjectURL(blob);
+          document.body.appendChild(elementA);
+          elementA.click();
+          document.body.removeChild(elementA);
+        }
       },
     });
   </script>
