@@ -6,148 +6,18 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>歌单匹配</title>
-  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet"
-    type="text/css" />
-  <link href="https://fastly.jsdelivr.net/npm/quasar@2.5.5/dist/quasar.prod.css" rel="stylesheet" type="text/css" />
-  <style type="text/css">
-    a {
-      text-decoration: none;
-    }
-
-    a:visited {
-      color: inherit;
-    }
-
-  </style>
 </head>
 
 <body>
-  <div id="app">
-    <q-layout view="hHh lpR fFf">
-      <q-header elevated class="bg-primary text-white">
-        <q-toolbar>
-          <q-btn dense flat round icon="menu" @click="toggleLeftDrawer"></q-btn>
-          <q-toolbar-title> 歌单匹配 </q-toolbar-title>
-        </q-toolbar>
-      </q-header>
-
-      <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered>
-        <q-list padding>
-
-          <a target="_blank" href="https://music.163.com/#/user/home?id=319475460">
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="launch"></q-icon>
-              </q-item-section>
-              <q-item-section> 我的网易云音乐主页 </q-item-section>
-            </q-item>
-          </a>
-
-          <a target="_blank" href="https://github.com/oldshensheep/toyweb">
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="launch"></q-icon>
-              </q-item-section>
-              <q-item-section> Github </q-item-section>
-            </q-item>
-          </a>
-
-          <div class="text-center q-mt-lg">我的歌单id：444265995</div>
-          <div class="text-center q-mt-lg">
-            你可以点击结果中的用户名进入网易云音乐主页
-          </div>
-        </q-list>
-      </q-drawer>
-
-      <q-page-container>
-        <div class="q-pa-md q-mx-auto" style="max-width: 1000px">
-          <q-form @submit="onSubmit" @reset="onReset">
-            <q-input filled clearable v-model="your_input" label="你的歌单ID或App分享的链接" autogrow :rules="idRules"></q-input>
-
-            <div class="bg-grey-2 q-pa-sm rounded-borders flex items-center">
-              你的平台:
-              <q-option-group v-model="your_platform" :options="options" inline></q-option-group>
-            </div>
-            <q-input class="q-mt-lg" filled clearable v-model="her_input" label="ta的歌单ID或App分享的链接" autogrow
-              :rules="idRules"></q-input>
-            <div class="bg-grey-2 q-pa-sm rounded-borders flex items-center">
-              ta的平台:
-              <q-option-group v-model="her_platform" :options="options" inline></q-option-group>
-            </div>
-            <div class="bg-grey-2 q-pa-sm rounded-borders flex items-center q-mt-lg">
-              <q-toggle v-model="accept" label="我接受"></q-toggle>
-              <div style="color: blue" @click="alert">服务须知</div>
-            </div>
-
-            <div class="q-mt-lg">
-              <q-btn label="Submit" type="submit" color="primary"></q-btn>
-              <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm"></q-btn>
-            </div>
-          </q-form>
-          <div class="q-mt-lg">
-            <div class="text-h6">
-              你和ta有 <q-badge class="text-h6" color="green"> {{same.length}} </q-badge>
-              首相同的歌曲
-            </div>
-            <q-badge color="pink"> {{msg}} </q-badge>
-            <div>
-              <q-badge color="blue-4">
-                <a class="text-white" :href='"https://music.163.com/#/user/home?id=" +your.id'>{{your.name}}</a>
-              </q-badge>的歌单
-              <q-badge color="blue-5"> {{your_playlist.name}}</q-badge> 有
-              <q-badge color="blue"> {{your_playlist.len}} </q-badge> 首歌
-              相同歌曲占比
-              <q-badge color="blue">
-                {{(same.length/your_playlist.len*100).toFixed(2)}}%</q-badge>
-            </div>
-            <div>
-              <q-badge color="red-4">
-                <a class="text-white" :href='"https://music.163.com/#/user/home?id=" +her.id'>{{her.name}}</a>
-              </q-badge>的歌单
-              <q-badge color="red-5"> {{her_playlist.name}} </q-badge>有
-              <q-badge color="red"> {{her_playlist.len}} </q-badge> 首歌
-              相同歌曲占比
-              <q-badge color="red">
-                {{(same.length/her_playlist.len*100).toFixed(2)}}%
-              </q-badge>
-            </div>
-          </div>
-
-          <q-table class="q-mt-lg" row-key="id" :filter="filter" :rows="same" :columns="columns"
-            :pagination="{rowsPerPage: 0}">
-            <template v-slot:body-cell-index="props">
-              <q-td :props="props">
-                <div>{{props.rowIndex+1}}</div>
-              </q-td>
-            </template>
-            <template v-slot:body-cell-name="props">
-              <q-td :props="props">
-                <div>
-                  <a target="_blank" :href="'https://music.163.com/#/song?id=' + props.row.id">
-                    {{props.value}}
-                  </a>
-                </div>
-              </q-td>
-            </template>
-            <template v-slot:top-right>
-              <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
-                <template v-slot:append>
-                  <q-icon name="search"></q-icon>
-                </template>
-              </q-input>
-            </template>
-          </q-table>
-        </div>
-      </q-page-container>
-    </q-layout>
+  <div>
+    site had move to <a
+      href="https://nextjs-demo-tau-beige.vercel.app/playlist-compare/">https://nextjs-demo-tau-beige.vercel.app/playlist-compare/</a>
   </div>
-
-  <script src="https://fastly.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js" crossorigin="anonymous"></script>
-  <script src="https://fastly.jsdelivr.net/npm/quasar@2.5.5/dist/quasar.umd.prod.js" crossorigin="anonymous"></script>
-  <script src="https://fastly.jsdelivr.net/npm/@vueuse/shared@8.5.0/index.iife.min.js" crossorigin="anonymous"></script>
-  <script src="https://fastly.jsdelivr.net/npm/@vueuse/core@8.5.0/index.iife.min.js" crossorigin="anonymous"></script>
-  <script src="./api.js"></script>
-  <script src="./app.js"></script>
+  <script>
+    setTimeout(() => {
+      window.location.replace("https://nextjs-demo-tau-beige.vercel.app/playlist-compare/")
+    }, 500)
+  </script>
 </body>
 
 </html>
